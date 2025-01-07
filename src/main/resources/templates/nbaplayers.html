@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBA Statistics Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/nba.css}">
+</head>
+<body>
+    <nav class="nav-bar">
+        <div class="nav-container">
+            <a href="/home" class="nav-logo">
+                <img src="/logo.png" alt="Logo">
+            </a>
+            <ul class="nav-links">
+                <li><a href="/home">Home</a></li>
+                <li><a href="/nbaplayers" class="active">Player Stats</a></li>
+                <li><a href="/nbateams">Team Stats</a></li>
+                <li><a href="/nbabets">Betting</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Collapsible Search Container -->
+        <div class="search-container">
+            <button class="collapse-button" id="searchToggle">
+                <i class="fas fa-search"></i> Search Options
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="search-section" id="searchSection" style="display: none;">
+                <input type="text" id="playerSearch" placeholder="Search for a player...">
+                <input type="text" id="teamSearch" placeholder="Search for a team...">
+            </div>
+        </div>
+
+        <!-- Stats Dashboard -->
+        <div class="stats-dashboard">
+            <!-- Player Performance Section -->
+            <section class="stats-section" id="playerStats">
+                <h2>Player Performance Metrics</h2>
+                <div class="stats-grid">
+                    <div class="stats-card basic-stats">
+                        <h3><i class="fas fa-basketball-ball"></i> Basic Stats</h3>
+                        <div class="stat-item">
+                            <span class="stat-label" data-explanation="Points Per Game - Average points scored per game">PPG</span>
+                            <span class="stat-value" id="ppg">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-explanation="Rebounds Per Game - Average rebounds collected per game">RPG</span>
+                            <span class="stat-value" id="rpg">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-explanation="Assists Per Game - Average assists distributed per game">APG</span>
+                            <span class="stat-value" id="apg">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-explanation="Steals Per Game - Average steals recorded per game">SPG</span>
+                            <span class="stat-value" id="spg">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-explanation="Blocks Per Game - Average shots blocked per game">BPG</span>
+                            <span class="stat-value" id="bpg">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-explanation="Turnovers Per Game - Average turnovers committed per game">TO</span>
+                            <span class="stat-value" id="to">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-explanation="Field Goal Percentage - Percentage of field goal attempts made">FG%</span>
+                            <span class="stat-value" id="fgp">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-explanation="Three Point Percentage - Percentage of three-point attempts made">3P%</span>
+                            <span class="stat-value" id="threep">-</span>
+                        </div>
+                    </div>
+                    <div class="stats-card advanced-stats">
+                        <h3><i class="fas fa-chart-line"></i> Advanced Stats</h3>
+                        <div class="stat-item">
+                            <div class="stat-label-group">
+                                <span class="stat-label">PER</span>
+                                <i class="fas fa-info-circle info-icon" 
+                                   data-tooltip="Player Efficiency Rating - Measures the per-minute production standardized such that the league average is 15. A PER above 20 suggests an All-Star level player, while below 10 indicates a marginal player."></i>
+                            </div>
+                            <span class="stat-value" id="per">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label-group">
+                                <span class="stat-label">USG%</span>
+                                <i class="fas fa-info-circle info-icon" 
+                                   data-tooltip="Usage Rate - The percentage of team plays used by a player while on the floor. This includes field goal attempts, free throw attempts, and turnovers."></i>
+                            </div>
+                            <span class="stat-value" id="usg">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label-group">
+                                <span class="stat-label">TS%</span>
+                                <i class="fas fa-info-circle info-icon" 
+                                   data-tooltip="True Shooting Percentage - A measure of shooting efficiency that takes into account field goals, 3-point field goals, and free throws. League average is typically around 55%."></i>
+                            </div>
+                            <span class="stat-value" id="ts">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label-group">
+                                <span class="stat-label">ORTG</span>
+                                <i class="fas fa-info-circle info-icon" 
+                                   data-tooltip="Offensive Rating - Points produced by a player per 100 team possessions. League average typically ranges from 108-112."></i>
+                            </div>
+                            <span class="stat-value" id="ortg">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label-group">
+                                <span class="stat-label">DRTG</span>
+                                <i class="fas fa-info-circle info-icon" 
+                                   data-tooltip="Defensive Rating - Points allowed per 100 possessions while a player is on the court. Lower numbers indicate better defense."></i>
+                            </div>
+                            <span class="stat-value" id="drtg">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label-group">
+                                <span class="stat-label">WS</span>
+                                <i class="fas fa-info-circle info-icon" 
+                                   data-tooltip="Win Shares - An estimate of the number of wins contributed by a player through offense and defense. A WS of 10+ typically indicates an All-Star caliber season."></i>
+                            </div>
+                            <span class="stat-value" id="ws">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label-group">
+                                <span class="stat-label">BPM</span>
+                                <i class="fas fa-info-circle info-icon" 
+                                   data-tooltip="Box Plus/Minus - A box score estimate of the points per 100 possessions that a player contributed above a league-average player. +2 is good, +4 is All-Star level, +6 is MVP level."></i>
+                            </div>
+                            <span class="stat-value" id="bpm">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label-group">
+                                <span class="stat-label">VORP</span>
+                                <i class="fas fa-info-circle info-icon" 
+                                   data-tooltip="Value Over Replacement Player - A box score estimate of the points per 100 team possessions that a player contributed above a replacement-level player. 2.0 is starter level, 4.0 is All-Star level."></i>
+                            </div>
+                            <span class="stat-value" id="vorp">-</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading stats...</p>
+    </div>
+
+    <!-- Error Message -->
+    <div id="errorMessage" class="error-message" style="display: none;">
+        <p>Error loading statistics. Please try again later.</p>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Data provided by NBA API • Updated every 24 hours</p>
+        <p>Last updated: <span id="lastUpdated">Loading...</span></p>
+    </footer>
+
+    <!-- Scripts -->
+    <script th:src="@{/js/nba.js}"></script>
+</body>
+</html>

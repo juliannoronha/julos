@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Register New User</title>
+    <!-- Import Google Fonts for Poppins font family -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Global styles */
+        * {
+            margin: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Body styles for centering content */
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #18191A; /* Dark mode background color */
+        }
+
+        /* Main container with glass effect */
+        .glass-container {
+            width: 90%;
+            max-width: 400px;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            text-align: center;
+        }
+
+        /* Heading styles */
+        h1 {
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Form group styles */
+        .form-group {
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        /* Label styles */
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+        }
+
+        /* Input and select styles */
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            font-size: 1em;
+        }
+
+        /* Focus styles for input and select */
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Styles for select dropdown options */
+        .form-group select option {
+            background-color: #18191A;
+            color: #ffffff;
+        }
+
+        /* Button styles */
+        .button {
+            display: inline-block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            margin: 0.5rem 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border: 1px solid #ffffff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Button hover effect */
+        .button:hover {
+            background-color: #ffffff;
+            color: #18191A;
+        }
+
+        /* Error message styles */
+        .error-message {
+            color: #ff6b6b;
+            font-size: 0.9em;
+            margin-top: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-container">
+        <h1>Register New User</h1>
+        <!-- Registration form -->
+        <form th:action="@{/users/register}" method="post" th:object="${user}">
+            <!-- Username input field -->
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" th:field="*{username}" required>
+                <!-- Error message for username field -->
+                <div th:if="${#fields.hasErrors('username')}" class="error-message" th:errors="*{username}"></div>
+            </div>
+            <!-- Password input field -->
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" th:field="*{password}" required>
+                <!-- Error message for password field -->
+                <div th:if="${#fields.hasErrors('password')}" class="error-message" th:errors="*{password}"></div>
+            </div>
+            <!-- Role selection dropdown -->
+            <div class="form-group">
+                <label for="role">Role:</label>
+                <select class="form-control" id="role" th:field="*{role}">
+                    <option th:each="roleOpt : ${T(com.demoproject.demo.entity.User.Role).values()}"
+                            th:value="${roleOpt.name()}" th:text="${roleOpt.name()}">
+                    </option>
+                </select>
+                <div th:if="${#fields.hasErrors('role')}" class="error-message" th:errors="*{role}"></div>
+            </div>
+            <!-- Submit button for the form -->
+            <button type="submit" class="button">Register</button>
+        </form>
+        <!-- Update the href attribute to point to the users page -->
+        <a th:href="@{/users}" class="button" style="margin-top: 1rem;">Back to Users</a>
+    </div>
+</body>
+</html>

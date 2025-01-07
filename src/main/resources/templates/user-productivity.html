@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>User Productivity</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #444;
+        }
+        th {
+            background-color: #333;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .error-message {
+            background-color: #ff4444;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: none;
+        }
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>User Productivity</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Total Submissions</th>
+                    <th>Total Pouches Checked</th>
+                    <th>Average Time Per Pouch</th>
+                    <th>Average Pouches per Hour</th>
+                </tr>
+            </thead>
+            <tbody id="productivityTableBody">
+                <tr id="noDataRow" style="display: none;">
+                    <td colspan="5">No data available</td>
+                </tr>
+            </tbody>
+        </table>
+        <a href="/view-responses" class="button">Back to Responses</a>
+    </div>
+
+    <script th:inline="javascript">
+        let eventSource;
+        const RECONNECT_TIMEOUT = 5000;
+        let lastHeartbeat = Date.now();
+        const HEARTBEAT_TIMEOUT = 30000; // 30 seconds
+
+        function formatDuration(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.round(seconds % 60);
+            return `${minutes}m ${remainingSeconds}s`;
+        }
+
+        function updateTable(users) {
+            console.log('Updating table with users:', users);
+            const tableBody = document.getElementById('productivityTableBody');
+            const noDataRow = document.getElementById('noDataRow');
+
+            if (!Array.isArray(users) || users.length === 0) {
+                tableBody.innerHTML = '';
+                noDataRow.style.display = 'table-row';
+            } else {
+                noDataRow.style.display = 'none';
+                tableBody.innerHTML = users.map(user => `
+                    <tr>
+                        <td>${escapeHtml(user.username)}</td>
+                        <td>${escapeHtml(String(user.totalSubmissions))}</td>
+                        <td>${escapeHtml(String(user.totalPouchesChecked))}</td>
+                        <td>${escapeHtml(formatDuration(user.avgTimePerPouch))}</td>
+                        <td>${escapeHtml(String(user.avgPouchesPerHour.toFixed(2)))}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function setupSSEConnection() {
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            eventSource = new EventSource('/api/user-productivity-stream');
+            
+            const debounce = (func, wait) => {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            };
+
+            const debouncedUpdateTable = debounce(updateTable, 250);
+
+            eventSource.onmessage = function(event) {
+                try {
+                    const users = JSON.parse(event.data);
+                    if (Array.isArray(users)) {
+                        debouncedUpdateTable(users);
+                    } else {
+                        console.error('Invalid data format received:', event.data);
+                        document.getElementById('noDataRow').style.display = 'table-row';
+                    }
+                } catch (error) {
+                    console.error('Error processing SSE data:', error);
+                    document.getElementById('noDataRow').style.display = 'table-row';
+                }
+            };
+            
+            eventSource.onerror = function(error) {
+                console.error('SSE connection error:', error);
+                showConnectionError(true);
+                setTimeout(() => {
+                    setupSSEConnection();
+                }, RECONNECT_TIMEOUT);
+            };
+
+            eventSource.onopen = function() {
+                showConnectionError(false);
+            };
+
+            // Add heartbeat listener
+            eventSource.addEventListener('comment', function(event) {
+                if (event.data === 'heartbeat') {
+                    lastHeartbeat = Date.now();
+                }
+            });
+        }
+
+        function checkConnection() {
+            if (Date.now() - lastHeartbeat > HEARTBEAT_TIMEOUT) {
+                console.log('No heartbeat received, reconnecting...');
+                setupSSEConnection();
+            }
+        }
+
+        // Check connection every 10 seconds
+        setInterval(checkConnection, 10000);
+
+        // Initial setup
+        setupSSEConnection();
+
+        // Add this helper function
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        window.addEventListener('beforeunload', () => {
+            if (eventSource) {
+                eventSource.close();
+            }
+            clearInterval(connectionCheckInterval);
+        });
+
+        // Store interval reference
+        const connectionCheckInterval = setInterval(checkConnection, 10000);
+
+        function showConnectionError(show) {
+            const errorDiv = document.getElementById('connectionError') || (() => {
+                const div = document.createElement('div');
+                div.id = 'connectionError';
+                div.className = 'error-message';
+                document.querySelector('.container').prepend(div);
+                return div;
+            })();
+            errorDiv.style.display = show ? 'block' : 'none';
+            errorDiv.textContent = show ? 'Connection lost. Attempting to reconnect...' : '';
+        }
+    </script>
+</body>
+</html>

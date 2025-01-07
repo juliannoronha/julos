@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <link rel="stylesheet" th:href="@{/css/styles2.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body th:data-user-role="${#authentication.authorities[0]}">
+    <nav id="mainNav">
+        <div class="navbar">
+            <div class="logo">
+                <img src="/logo.png" alt="McKesson Logo">
+            </div>
+            <ul>
+                <li sec:authorize="hasRole('ADMIN')">
+                    <div class="panel admin-panel">
+                        <span>Admin Panel</span>
+                        <ul>
+                            <li><a href="#" onclick="fadeOutAndNavigate('/users', event)"><i class="fas fa-users"></i> Manage Users</a></li>
+                            <li><a href="#" onclick="fadeOutAndNavigate('/audit', event)"><i class="fas fa-history"></i> Audit Logs</a></li>
+                        </ul>
+                    </div>
+                </li>
+                <li sec:authorize="hasAnyRole('ADMIN', 'MODERATOR', 'CHECKER', 'SHIPPING', 'INVENTORY')">
+                    <div class="panel central-fill-panel">
+                        <span>Central Fill</span>
+                        <ul>
+                            <li><a href="#" id="pacmedButton" onclick="handlePacMedClick(event)"><i class="fas fa-box"></i> PacMed</a></li>
+                            <li><a href="#" id="wellcaButton" onclick="handleWellcaClick(event)"><i class="fas fa-pills"></i> Well.ca</a></li>
+                        </ul>
+                    </div>
+                </li>
+                <li sec:authorize="hasAnyRole('USER', 'ADMIN', 'MODERATOR')">
+                    <div class="panel sports-panel">
+                        <span>Sports Stats</span>
+                        <ul>
+                            <li><a href="#" id="nbaButton" onclick="handleNBAClick(event)"><i class="fas fa-basketball-ball"></i> NBA</a></li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+            <div class="logout">
+                <form th:action="@{/logout}" method="post" onsubmit="return fadeOutAndSubmit(this, event)">
+                    <button type="submit" class="button"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+    <div class="main" id="mainContent">
+        <div class="content-wrapper">
+            <div class="welcome-message" id="welcomeMessage">
+                <h1>Hello, <span th:text="${#authentication.name}">User</span>!</h1>
+            </div>
+            <div id="accessDeniedMessage" class="access-denied-message" aria-live="polite">
+                <p>You do not have access to this page!</p>
+            </div>
+        </div>
+        <!-- Dashboard Card - Now visible only to ADMIN and MODERATOR -->
+        <div class="dashboard" sec:authorize="hasAnyRole('ADMIN', 'MODERATOR')">
+            <h3>PacMed</h3>
+            <div class="dashboard-item">
+                <div class="dashboard-item-label">Total Submissions</div>
+                <div class="dashboard-item-value" id="totalSubmissions">-</div>
+            </div>
+            <div class="dashboard-item">
+                <div class="dashboard-item-label">Total Pouches Checked</div>
+                <div class="dashboard-item-value" id="totalPouchesChecked">-</div>
+            </div>
+            <div class="dashboard-item">
+                <div class="dashboard-item-label">Average Time Per Pouch</div>
+                <div class="dashboard-item-value" id="avgTimePerPouch">-</div>
+            </div>
+            <div class="dashboard-item">
+                <div class="dashboard-item-label">Average Pouches per Hour</div>
+                <div class="dashboard-item-value" id="avgPouchesPerHour">-</div>
+            </div>
+            <!-- Add this new section for the chart -->
+            <div class="dashboard-chart">
+                <canvas id="pacMedChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var contextPath = /*[[@{/}]]*/ '';
+        /*]]>*/
+    </script>
+    <script th:src="@{/js/home.js}"></script>
+    
+</body>
+</html>

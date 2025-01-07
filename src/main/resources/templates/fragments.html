@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style th:fragment="style">
+        /* Global styles */
+        * {
+            margin: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #18191A;
+        }
+
+        .container {
+            width: 300px;
+            padding: 2rem;
+            background-color: #242526;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Logo styles */
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .logo-background {
+            width: 250px;
+            height: 120px;
+            background-image: url([[@{/logo.png}]]);
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        /* Form styles */
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        input {
+            padding: 10px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        /* Error message styles */
+        .error-message {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        /* Logout message styles */
+        .logout-message {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 0.9em;
+            opacity: 1;
+            transition: opacity 0.6s ease-in-out;
+        }
+
+        .logout-message.fade-out {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div th:fragment="logout-message" th:if="${param.logout}" class="logout-message" id="logoutMessage">
+        You have been logged out successfully.
+    </div>
+    <!-- Navigation fragment -->
+    <nav th:fragment="navigation">
+        <!-- ... other navigation items ... -->
+        <div class="logout">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="button"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- Add this script fragment -->
+    <script th:fragment="logoutScript">
+        document.querySelector('form[action="/logout"]').addEventListener('submit', function() {
+            sessionStorage.removeItem('dashboardCardShown');
+        });
+    </script>
+</body>
+</html>

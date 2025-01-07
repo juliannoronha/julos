@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<!-- This is the error page template using Thymeleaf templating engine -->
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Error</title>
+    <!-- Inline CSS styles for the error page -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .error-container {
+            text-align: center;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: white;
+        }
+        .error-message {
+            color: red;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        .home-link {
+            text-decoration: none;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main container for the error message and home link -->
+    <div class="error-container">
+        <h1>Oops!</h1>
+        <!-- This paragraph displays the error message. The th:text attribute is a Thymeleaf expression
+             that will replace the content of the <p> tag with the value of ${errorMessage} -->
+        <p class="error-message" th:text="${errorMessage}">An error occurred.</p>
+        <!-- This anchor tag provides a link back to the home page. The href="/" attribute sets the link to the root URL -->
+        <a href="/" class="home-link">Go back to home page</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Audit Logs</title>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    
+    <link rel="stylesheet" th:href="@{/css/audit.css}">
+    <script th:src="@{/js/audit.js}"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <button class="back-button" onclick="fadeOutAndNavigate('/', event)">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </button>
+            <h1>Audit Logs</h1>
+            <button class="clear-logs-button" onclick="confirmClearLogs()">
+                <i class="fas fa-trash-alt"></i> Clear Logs
+            </button>
+        </div>
+        
+        <div class="audit-logs">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Action</th>
+                        <th>Performed By</th>
+                        <th>Category</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="log : ${auditLogs}">
+                        <td th:text="${#temporals.format(log.timestamp, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01 12:00:00</td>
+                        <td th:text="${log.action}">Action</td>
+                        <td th:text="${log.performedBy}">User</td>
+                        <td th:text="${log.category}">Category</td>
+                        <td th:text="${log.details}">Details</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="pagination" th:if="${auditLogs.totalPages > 1}">
+                <span th:each="i : ${#numbers.sequence(0, auditLogs.totalPages - 1)}">
+                    <a th:href="@{/audit(page=${i})}" 
+                       th:text="${i + 1}" 
+                       th:class="${auditLogs.number == i ? 'active' : ''}">1</a>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</body>
+</html>

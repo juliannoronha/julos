@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PacMed</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/packmed-styles.css}">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body>
+    <!-- Add this check at the beginning of the body -->
+    <div sec:authorize="hasAnyRole('CHECKER', 'ADMIN', 'MODERATOR')">
+        <!-- Navigation bar -->
+        <nav class="nav-bar">
+            <div class="nav-container">
+                <a href="/home" class="nav-logo">
+                    <img src="/logo.png" alt="Logo">
+                </a>
+                <ul class="nav-links">
+                    <li><a href="/home">Home</a></li>
+                    <li><a href="/packmed" class="active">Pack Med</a></li>
+                    <li sec:authorize="hasAnyRole('ADMIN', 'MODERATOR')"><a href="/view-responses">View Responses</a></li>
+                    <li><a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="content-wrapper">
+            <!-- Main content container -->
+            <div class="form-container">
+                <div class="container">
+                    <h2>PacMed</h2>
+                    
+                    <!-- Success message display -->
+                    <div th:if="${successMessage}" class="success-message" id="successMessage">
+                        <p th:text="${successMessage}"></p>
+                    </div>
+                    
+                    <!-- Add this near the top of your form if it's not already there -->
+                    <div id="successMessage" class="success-message" style="display: none;"></div>
+                    
+                    <!-- Pack Med form -->
+                    <form id="questionForm" method="post">
+                        <div class="input-group">
+                            <label for="startTime">What time did you start checking?</label>
+                            <input type="time" id="startTime" name="startTime" required class="time-input">
+                            <div class="error" id="startTimeError"></div>
+                        </div>
+                        <div class="input-group">
+                            <label for="endTime">What time did you finish checking?</label>
+                            <input type="time" id="endTime" name="endTime" required class="time-input">
+                            <div class="error" id="endTimeError"></div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="store">What store are you checking?</label>
+                            <select id="store" name="store" required>
+                                <option value="" disabled selected>Select store</option>
+                                <option value="Vanier">Vanier</option>
+                                <option value="Elgain">Elgain</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="pouchesChecked">How many pouches did you check?</label>
+                            <input type="number" id="pouchesChecked" name="pouchesChecked" required min="0">
+                            <div class="error" id="pouchesError"></div>
+                        </div>
+                        
+                        <button type="submit" class="button submit-button">Submit</button>
+                    </form>
+                    <!-- Home button for non-admin and non-moderator users -->
+                    <div sec:authorize="!hasAnyRole('ADMIN', 'MODERATOR')">
+                        <a th:href="@{/home}" class="button home-button">Home</a>
+                    </div>
+                    <!-- Admin and Moderator specific buttons -->
+                    <div sec:authorize="hasAnyRole('ADMIN', 'MODERATOR')" class="admin-buttons">
+                        <a th:href="@{/view-responses}" class="button admin-button">View Responses</a>
+                        <a th:href="@{/home}" class="button home-button">Home</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Card - Now visible only to ADMIN and MODERATOR -->
+            <div class="dashboard" sec:authorize="hasAnyRole('ADMIN', 'MODERATOR')">
+                <div class="dashboard-item">
+                    <div class="dashboard-item-label">Total Submissions</div>
+                    <div class="dashboard-item-value" id="totalSubmissions">-</div>
+                </div>
+                <div class="dashboard-item">
+                    <div class="dashboard-item-label">Total Pouches Checked</div>
+                    <div class="dashboard-item-value" id="totalPouchesChecked">-</div>
+                </div>
+                <div class="dashboard-item">
+                    <div class="dashboard-item-label">Average Time Per Pouch</div>
+                    <div class="dashboard-item-value" id="avgTimePerPouch">-</div>
+                </div>
+                <div class="dashboard-item">
+                    <div class="dashboard-item-label">Average Pouches per Hour</div>
+                    <div class="dashboard-item-value" id="avgPouchesPerHour">-</div>
+                </div>
+                <div class="dashboard-chart">
+                    <canvas id="pacMedChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add this for users without the required roles -->
+    <div sec:authorize="!hasAnyRole('CHECKER', 'ADMIN', 'MODERATOR')">
+        <p>You don't have permission to view this content.</p>
+    </div>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var contextPath = /*[[@{/}]]*/ '';
+        /*]]>*/
+    </script>
+    <script th:src="@{/js/packmed.js}"></script>
+    <!-- Add this form at the end of the body -->
+    <form id="logout-form" th:action="@{/logout}" method="post" style="display: none;">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    </form>
+    <!-- Add this right before your </body> tag -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var csrfToken = /*[[${_csrf.token}]]*/ '';
+        var csrfHeader = /*[[${_csrf.headerName}]]*/ '';
+        /*]]>*/
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>

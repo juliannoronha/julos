@@ -1,0 +1,184 @@
+/* =================================================================
+ * Home Page Styles
+ * Purpose: Defines styles for the main dashboard and navigation
+ * Dependencies: Font Awesome, Montserrat font
+ * ================================================================= */
+
+/* -----------------------------------------------------------------
+ * Animations
+ * @note: Defines core entrance animations for UI elements
+ * ----------------------------------------------------------------- */
+
+@keyframes slideInFade {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInFromTop {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Animation timing assignments for navigation elements
+ * @note: Staged entrance creates a cascading effect */
+nav, nav .logo, nav ul li, nav .logout, .main-top {
+    opacity: 0;
+    animation: slideInFade 0.5s ease-out forwards;
+}
+
+/* Cascading animation delays for nav elements
+ * @performance: Consider reducing delays for faster initial load */
+nav .logo { animation-delay: 0.2s; }
+nav ul li:nth-child(1) { animation-delay: 0.4s; }
+nav ul li:nth-child(2) { animation-delay: 0.6s; }
+nav ul li:nth-child(3) { animation-delay: 0.8s; }
+nav .logout { animation-delay: 1s; }
+
+/* -----------------------------------------------------------------
+ * Navigation Layout
+ * @purpose: Core navigation structure and spacing
+ * ----------------------------------------------------------------- */
+
+.logo {
+    margin-bottom: 0;
+    padding-bottom: 1rem;
+}
+
+nav ul {
+    margin-top: 0;
+}
+
+/* -----------------------------------------------------------------
+ * Panel Components
+ * @purpose: Styles for admin and general panels
+ * @note: Shared between admin and regular panels for consistency
+ * ----------------------------------------------------------------- */
+
+.panel, .admin-panel {
+    width: 100%;
+    text-align: left;
+}
+
+/* Panel headers */
+.panel > span, .admin-panel > span {
+    display: block;
+    padding: 10px 1.5rem;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 1em;
+    margin-bottom: 10px;
+}
+
+/* Panel navigation lists
+ * @accessibility: Removes default list styling for cleaner navigation */
+.panel ul, .admin-panel ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.panel ul li, .admin-panel ul li {
+    width: 100%;
+}
+
+/* Panel link styling
+ * @note: Consistent padding for touch targets */
+.panel ul li a, .admin-panel ul li a {
+    padding: 1rem 1.5rem;
+}
+
+/* Icon styling within panels
+ * @dependency: Requires Font Awesome */
+.panel ul li a i, .admin-panel ul li a i {
+    width: 24px;
+    font-size: 18px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+/* -----------------------------------------------------------------
+ * Main Content Layout
+ * @purpose: Primary content structure and dashboard
+ * ----------------------------------------------------------------- */
+
+.main {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.content-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Dashboard Card
+ * @note: Fixed positioning with animation entrance
+ * @performance: Uses GPU acceleration for animations */
+.dashboard {
+    position: fixed;
+    background-color: #2a2a2a;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    width: 300px;
+    margin-left: 20px;
+    align-self: flex-start;
+    top: 20px;
+    opacity: 0;
+    animation: slideInFade 0.5s ease-out forwards;
+    animation-delay: 1.2s;
+}
+
+/* Dashboard Components
+ * @purpose: Styles for dashboard elements and statistics display */
+.dashboard h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #ffffff;
+}
+
+.dashboard-item {
+    margin-bottom: 15px;
+}
+
+.dashboard-item-label {
+    font-size: 0.9em;
+    color: #888;
+}
+
+.dashboard-item-value {
+    font-size: 1.2em;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* -----------------------------------------------------------------
+ * Utility Classes
+ * @purpose: Helper styles for messages and charts
+ * ----------------------------------------------------------------- */
+
+.welcome-message {
+    margin-bottom: 20px;
+}
+
+.welcome-message h1 {
+    color: #ffffff;
+}
+
+/* Error message styling
+ * @accessibility: Uses semantic colors for error states */
+.access-denied-message {
+    color: #ff6b6b;
+    display: none;
+}
+
+/* Chart container
+ * @dependency: Requires Chart.js
+ * @note: Fixed height for consistent layout */
+.dashboard-chart {
+    margin-top: 20px;
+    height: 200px;
+}

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBA Team Statistics Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/nba.css}">
+</head>
+<body>
+    <nav class="nav-bar">
+        <div class="nav-container">
+            <a href="/home" class="nav-logo">
+                <img src="/logo.png" alt="Logo">
+            </a>
+            <ul class="nav-links">
+                <li><a href="/home">Home</a></li>
+                <li><a href="/nbaplayers">Player Stats</a></li>
+                <li><a href="/nbateams" class="active">Team Stats</a></li>
+                <li><a href="/nbabets">Betting</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Collapsible Search Container -->
+        <div class="search-container">
+            <button class="collapse-button" id="searchToggle">
+                <i class="fas fa-search"></i> Search Options
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="search-section" id="searchSection" style="display: none;">
+                <input type="text" id="teamSearch" placeholder="Team">
+                <input type="text" id="teamSearch" placeholder="Opponent">
+            </div>
+        </div>
+
+        <!-- Stats Dashboard -->
+        <div class="stats-dashboard">
+            <!-- Team Stats Section -->
+            <section class="stats-section" id="teamStats">
+                <h2>Team Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stats-card basic-team-stats">
+                        <h3><i class="fas fa-users"></i> Basic Team Stats</h3>
+                        <div class="stat-item">
+                            <span class="stat-label" data-explanation="Points Per Game - Team's average points scored per game">PPG</span>
+                            <span class="stat-value" id="teamPpg">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-explanation="Opponent Points Per Game - Average points allowed per game">OPPG</span>
+                            <span class="stat-value" id="teamOppg">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-explanation="Rebounds Per Game - Team's average rebounds per game">RPG</span>
+                            <span class="stat-value" id="teamRpg">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-explanation="Assists Per Game - Team's average assists per game">APG</span>
+                            <span class="stat-value" id="teamApg">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-explanation="Field Goal Percentage - Team's shooting percentage from the field">FG%</span>
+                            <span class="stat-value" id="teamFgp">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-explanation="Three Point Percentage - Team's shooting percentage from three-point range">3P%</span>
+                            <span class="stat-value" id="team3pp">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-explanation="Free Throw Percentage - Team's shooting percentage from the free throw line">FT%</span>
+                            <span class="stat-value" id="teamFtp">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-explanation="Turnovers Per Game - Team's average turnovers per game">TOPG</span>
+                            <span class="stat-value" id="teamTopg">-</span>
+                        </div>
+                    </div>
+                    <div class="stats-card advanced-team-stats">
+                        <h3><i class="fas fa-chart-line"></i> Advanced Team Stats</h3>
+                        <div class="stat-item">
+                            <div class="stat-label-group">
+                                <span class="stat-label">NET RTG</span>
+                                <i class="fas fa-info-circle info-icon" 
+                                   data-tooltip="Net Rating - Team's point differential per 100 possessions"></i>
+                            </div>
+                            <span class="stat-value" id="teamNetRtg">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label-group">
+                                <span class="stat-label">PACE</span>
+                                <i class="fas fa-info-circle info-icon" 
+                                   data-tooltip="Pace - Number of possessions per 48 minutes"></i>
+                            </div>
+                            <span class="stat-value" id="teamPace">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label-group">
+                                <span class="stat-label">OFF RTG</span>
+                                <i class="fas fa-info-circle info-icon" 
+                                   data-tooltip="Offensive Rating - Points scored per 100 possessions"></i>
+                            </div>
+                            <span class="stat-value" id="teamOffRtg">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label-group">
+                                <span class="stat-label">DEF RTG</span>
+                                <i class="fas fa-info-circle info-icon" 
+                                   data-tooltip="Defensive Rating - Points allowed per 100 possessions"></i>
+                            </div>
+                            <span class="stat-value" id="teamDefRtg">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label-group">
+                                <span class="stat-label">AST%</span>
+                                <i class="fas fa-info-circle info-icon" 
+                                   data-tooltip="Assist Percentage - Percentage of field goals that are assisted"></i>
+                            </div>
+                            <span class="stat-value" id="teamAstPct">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label-group">
+                                <span class="stat-label">REB%</span>
+                                <i class="fas fa-info-circle info-icon" 
+                                   data-tooltip="Rebound Percentage - Percentage of available rebounds grabbed"></i>
+                            </div>
+                            <span class="stat-value" id="teamRebPct">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label-group">
+                                <span class="stat-label">eFG%</span>
+                                <i class="fas fa-info-circle info-icon" 
+                                   data-tooltip="Effective Field Goal Percentage - Field goal percentage adjusted for three-pointers"></i>
+                            </div>
+                            <span class="stat-value" id="teamEfg">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label-group">
+                                <span class="stat-label">TS%</span>
+                                <i class="fas fa-info-circle info-icon" 
+                                   data-tooltip="True Shooting Percentage - Shooting percentage adjusted for three-pointers and free throws"></i>
+                            </div>
+                            <span class="stat-value" id="teamTs">-</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading stats...</p>
+    </div>
+
+    <!-- Error Message -->
+    <div id="errorMessage" class="error-message" style="display: none;">
+        <p>Error loading statistics. Please try again later.</p>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Data provided by NBA API • Updated every 24 hours</p>
+        <p>Last updated: <span id="lastUpdated">Loading...</span></p>
+    </footer>
+
+    <!-- Scripts -->
+    <script th:src="@{/js/nba.js}"></script>
+</body>
+</html>

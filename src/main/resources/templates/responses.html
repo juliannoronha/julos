@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>User Responses</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/responses.css}">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body>
+    <!-- Navigation bar (content not shown) -->
+    <nav class="nav-bar">
+        <!-- ... navigation bar content ... -->
+    </nav>
+
+    <div class="container">
+        <!-- Display success message if present -->
+        <div th:if="${successMessage}" class="success-message">
+            <p th:text="${successMessage}"></p>
+        </div>
+
+        <div id="messageBubble" class="message-bubble" style="display: none;">
+            <p id="messageText"></p>
+        </div>
+
+        <!-- Remove the style="display: none;" attribute -->
+        <div class="filter-panel" id="filterPanel">
+            <div class="filter-row">
+                <input type="text" id="nameFilter" placeholder="Filter by Name" th:value="${nameFilter}">
+                <select id="storeFilter">
+                    <option value="" disabled selected>All Stores</option>
+                    <option value="Vanier">Vanier</option>
+                    <option value="Elgain">Elgain</option>
+                </select>
+                <select id="monthFilter">
+                    <option value="" disabled selected>All Months</option>
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+            <div class="button-row">
+                <button id="submitNameFilter" class="button submit-button">Submit</button>
+                <button id="resetFilter" class="button">Reset Filters</button>
+            </div>
+        </div>
+
+        <!-- Table to display user responses -->
+        <table id="responsesTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Submission Date</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Pouches Checked</th>
+                    <th>Store</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Iterate over responses and display each in a row -->
+                <tr th:each="response : ${responses.content}">
+                    <td th:text="${response.id}"></td>
+                    <td th:text="${response.user.username}"></td>
+                    <td th:text="${#temporals.format(response.submissionDate, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td th:text="${#temporals.format(response.startTime, 'HH:mm')}"></td>
+                    <td th:text="${#temporals.format(response.endTime, 'HH:mm')}"></td>
+                    <td th:text="${response.pouchesChecked}"></td>
+                    <td th:text="${response.store}"></td>
+                    <td>
+                        <!-- Form to delete a response -->
+                        <button class="delete-btn" th:data-id="${response.id}">Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="bottom-buttons-container">
+            <button class="button" onclick="location.href='/packmed'">Back to PacMed</button>
+            <button class="button" onclick="location.href='/user-productivity'">Individual Productivity</button>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div th:if="${responses.totalPages > 1}" class="pagination-container">
+        <ul class="pagination">
+            <li th:class="${responses.first ? 'disabled' : ''}">
+                <a th:if="${not responses.first}" th:href="@{/view-responses(page=${responses.number-1},size=${responses.size},nameFilter=${nameFilter},store=${selectedStore},month=${selectedMonth})}" th:attr="data-page=${responses.number-1}">Previous</a>
+                <span th:if="${responses.first}">Previous</span>
+            </li>
+
+            <li th:each="pageNo : ${#numbers.sequence(0, responses.totalPages - 1)}"
+                th:class="${pageNo == responses.number ? 'active' : ''}">
+                <a th:if="${pageNo != responses.number}" th:href="@{/view-responses(page=${pageNo},size=${responses.size},nameFilter=${nameFilter},store=${selectedStore},month=${selectedMonth})}" th:text="${pageNo + 1}" th:attr="data-page=${pageNo}"></a>
+                <span th:if="${pageNo == responses.number}" th:text="${pageNo + 1}"></span>
+            </li>
+
+            <li th:class="${responses.last ? 'disabled' : ''}">
+                <a th:if="${not responses.last}" th:href="@{/view-responses(page=${responses.number+1},size=${responses.size},nameFilter=${nameFilter},store=${selectedStore},month=${selectedMonth})}" th:attr="data-page=${responses.number+1}">Next</a>
+                <span th:if="${responses.last}">Next</span>
+            </li>
+        </ul>
+    </div>
+
+    <script th:src="@{/js/responses.js}"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const forms = document.querySelectorAll('form[action="/delete-response"]');
+        forms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (confirm('Are you sure you want to delete this response?')) {
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: new FormData(this),
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_csrf"]').value
+                        }
+                    }).then(response => {
+                        if (response.ok) {
+                            return response.text();
+                        } else {
+                            throw new Error('Server responded with status: ' + response.status);
+                        }
+                    }).then(data => {
+                        alert(data);
+                        location.reload();
+                    }).catch(error => {
+                        console.error('Error:', error);
+                        alert('Error deleting response: ' + error.message);
+                    });
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>
