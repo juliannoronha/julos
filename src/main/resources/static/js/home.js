@@ -123,7 +123,7 @@ function handleUnauthorizedAccess(url) {
 }
 
 /* -----------------------------------------------------------------------------
- * Navigation Handlers
+ * Navigation Handlers (TEMP DISABLED - PAC)
  * -------------------------------------------------------------------------- */
 
 /**
@@ -240,193 +240,192 @@ function flashButton(button) {
 }
 
 /* -----------------------------------------------------------------------------
- * Dashboard Data Management
- * @performance Critical section - handles real-time updates
+ * Dashboard Data Management (TEMP DISABLED - PAC)
  * -------------------------------------------------------------------------- */
 
-/**
- * Fetches and processes productivity metrics
- * @throws {Error} If API response is invalid
- * @note Implements error handling and data validation
- */
-function fetchOverallProductivity() {
-    fetch('/api/overall-productivity')
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            if (!data || typeof data !== 'object') {
-                throw new Error('Invalid data format received');
-            }
-            updateDashboard(data);
-            if (data.chartData && Object.keys(data.chartData).length > 0) {
-                createPacMedChart(data.chartData);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            updateDashboardError(error.message);
-        });
-}
+// /**
+//  * Fetches and processes productivity metrics
+//  * @throws {Error} If API response is invalid
+//  * @note Implements error handling and data validation
+//  */
+// function fetchOverallProductivity() {
+//     fetch('/api/overall-productivity')
+//         .then(response => {
+//             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+//             return response.json();
+//         })
+//         .then(data => {
+//             if (!data || typeof data !== 'object') {
+//                 throw new Error('Invalid data format received');
+//             }
+//             updateDashboard(data);
+//             if (data.chartData && Object.keys(data.chartData).length > 0) {
+//                 createPacMedChart(data.chartData);
+//             }
+//         })
+//         .catch(error => {
+//             console.error('Error:', error);
+//             updateDashboardError(error.message);
+//         });
+// }
 
-/**
- * Updates dashboard with productivity metrics
- * @param {Object} data - Dashboard data object
- */
-function updateDashboard(data) {
-    document.getElementById('totalSubmissions').textContent = data.totalSubmissions ?? 'N/A';
-    document.getElementById('totalPouchesChecked').textContent = data.totalPouchesChecked ?? 'N/A';
-    document.getElementById('avgTimePerPouch').textContent = 
-        data.avgTimePerPouch != null ? formatDuration(data.avgTimePerPouch) : 'N/A';
-    document.getElementById('avgPouchesPerHour').textContent = 
-        data.avgPouchesPerHour != null ? data.avgPouchesPerHour.toFixed(2) : 'N/A';
-}
+// /**
+//  * Updates dashboard with productivity metrics
+//  * @param {Object} data - Dashboard data object
+//  */
+// function updateDashboard(data) {
+//     document.getElementById('totalSubmissions').textContent = data.totalSubmissions ?? 'N/A';
+//     document.getElementById('totalPouchesChecked').textContent = data.totalPouchesChecked ?? 'N/A';
+//     document.getElementById('avgTimePerPouch').textContent = 
+//         data.avgTimePerPouch != null ? formatDuration(data.avgTimePerPouch) : 'N/A';
+//     document.getElementById('avgPouchesPerHour').textContent = 
+//         data.avgPouchesPerHour != null ? data.avgPouchesPerHour.toFixed(2) : 'N/A';
+// }
 
-/**
- * Displays error message in dashboard
- * @param {string} errorMessage - Error message to display
- */
-function updateDashboardError(errorMessage) {
-    const errorText = 'Error: ' + errorMessage;
-    ['totalSubmissions', 'totalPouchesChecked', 
-     'avgTimePerPouch', 'avgPouchesPerHour'].forEach(id => {
-        document.getElementById(id).textContent = errorText;
-    });
-}
+// /**
+//  * Displays error message in dashboard
+//  * @param {string} errorMessage - Error message to display
+//  */
+// function updateDashboardError(errorMessage) {
+//     const errorText = 'Error: ' + errorMessage;
+//     ['totalSubmissions', 'totalPouchesChecked', 
+//      'avgTimePerPouch', 'avgPouchesPerHour'].forEach(id => {
+//         document.getElementById(id).textContent = errorText;
+//     });
+// }
 
-/**
- * Formats duration in minutes and seconds
- * @param {number} seconds - Duration in seconds
- * @returns {string} Formatted duration string
- */
-function formatDuration(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.round(seconds % 60);
-    return `${minutes}m ${remainingSeconds.toString().padStart(2, '0')}s`;
-}
+// /**
+//  * Formats duration in minutes and seconds
+//  * @param {number} seconds - Duration in seconds
+//  * @returns {string} Formatted duration string
+//  */
+// function formatDuration(seconds) {
+//     const minutes = Math.floor(seconds / 60);
+//     const remainingSeconds = Math.round(seconds % 60);
+//     return `${minutes}m ${remainingSeconds.toString().padStart(2, '0')}s`;
+// }
 
 /* -----------------------------------------------------------------------------
- * Server-Sent Events (SSE) Management
+ * Server-Sent Events (SSE) Management (TEMP DISABLED - PAC)
  * -------------------------------------------------------------------------- */
 
-let eventSource;
+// let eventSource;
 
 /**
  * Sets up SSE connection for real-time updates
  * @note Includes auto-reconnect on error
  */
-function setupSSEConnection() {
-    if (eventSource) eventSource.close();
+// function setupSSEConnection() {
+//     if (eventSource) eventSource.close();
     
-    eventSource = new EventSource('/api/overall-productivity-stream');
+//     eventSource = new EventSource('/api/overall-productivity-stream');
     
-    window.addEventListener('beforeunload', () => {
-        if (eventSource) eventSource.close();
-    });
+//     window.addEventListener('beforeunload', () => {
+//         if (eventSource) eventSource.close();
+//     });
     
-    eventSource.onmessage = function(event) {
-        try {
-            const data = JSON.parse(event.data);
-            if (!Array.isArray(data)) updateDashboard(data);
-        } catch (error) {
-            console.error('Error parsing SSE data:', error);
-        }
-    };
+//     eventSource.onmessage = function(event) {
+//         try {
+//             const data = JSON.parse(event.data);
+//             if (!Array.isArray(data)) updateDashboard(data);
+//         } catch (error) {
+//             console.error('Error parsing SSE data:', error);
+//         }
+//     };
     
-    eventSource.onerror = function(error) {
-        console.error('Error in SSE connection:', error);
-        eventSource.close();
-        setTimeout(setupSSEConnection, 5000);
-    };
+//     eventSource.onerror = function(error) {
+//         console.error('Error in SSE connection:', error);
+//         eventSource.close();
+//         setTimeout(setupSSEConnection, 5000);
+//     };
 }
 
 /* -----------------------------------------------------------------------------
- * Chart Management
+ * Chart Management (TEMP DISABLED - PAC)
  * -------------------------------------------------------------------------- */
 
-let chartDataCache = new Map();
-let pacMedChart = null;
-let chartCleanupInterval;
+// let chartDataCache = new Map();
+// let pacMedChart = null;
+// let chartCleanupInterval;
 
-/**
- * Creates/updates productivity chart
- * @param {Object} data - Chart data object
- */
-function createPacMedChart(data) {
-    if (!data?.labels || !data?.pouchesChecked) {
-        console.error('Invalid chart data');
-        return;
-    }
+// /**
+//  * Creates/updates productivity chart
+//  * @param {Object} data - Chart data object
+//  */
+// function createPacMedChart(data) {
+//     if (!data?.labels || !data?.pouchesChecked) {
+//         console.error('Invalid chart data');
+//         return;
+//     }
 
-    const ctx = document.getElementById('pacMedChart');
-    if (!ctx) {
-        console.error('Canvas element not found');
-        return;
-    }
+//     const ctx = document.getElementById('pacMedChart');
+//     if (!ctx) {
+//         console.error('Canvas element not found');
+//         return;
+//     }
 
-    if (pacMedChart) {
-        pacMedChart.destroy();
-        pacMedChart = null;
-    }
+//     if (pacMedChart) {
+//         pacMedChart.destroy();
+//         pacMedChart = null;
+//     }
 
-    chartDataCache.set('latest', {
-        data: data,
-        timestamp: Date.now()
-    });
+//     chartDataCache.set('latest', {
+//         data: data,
+//         timestamp: Date.now()
+//     });
 
-    pacMedChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: data.labels,
-            datasets: [{
-                label: 'Pouches Checked',
-                data: data.pouchesChecked,
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: { y: { beginAtZero: true } },
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Pouches Checked (Last 7 Days)',
-                    font: { size: 16 }
-                },
-                subtitle: {
-                    display: true,
-                    text: data.pouchesChecked.every(val => val === 0) ? 
-                          'Sample data shown (no actual data available)' : '',
-                    color: 'red',
-                    font: { size: 14, style: 'italic' }
-                }
-            }
-        }
-    });
-}
+//     pacMedChart = new Chart(ctx, {
+//         type: 'line',
+//         data: {
+//             labels: data.labels,
+//             datasets: [{
+//                 label: 'Pouches Checked',
+//                 data: data.pouchesChecked,
+//                 borderColor: 'rgb(75, 192, 192)',
+//                 tension: 0.1
+//             }]
+//         },
+//         options: {
+//             responsive: true,
+//             maintainAspectRatio: false,
+//             scales: { y: { beginAtZero: true } },
+//             plugins: {
+//                 title: {
+//                     display: true,
+//                     text: 'Pouches Checked (Last 7 Days)',
+//                     font: { size: 16 }
+//                 },
+//                 subtitle: {
+//                     display: true,
+//                     text: data.pouchesChecked.every(val => val === 0) ? 
+//                           'Sample data shown (no actual data available)' : '',
+//                     color: 'red',
+//                     font: { size: 14, style: 'italic' }
+//                 }
+//             }
+//         }
+//     });
+// }
 
-/**
- * Cleans up chart resources to prevent memory leaks
- * @note Runs every 5 minutes
- */
-function cleanupChartResources() {
-    const CACHE_TIMEOUT = 30 * 60 * 1000; // 30 minutes
-    const now = Date.now();
+// /**
+//  * Cleans up chart resources to prevent memory leaks
+//  * @note Runs every 5 minutes
+//  */
+// function cleanupChartResources() {
+//     const CACHE_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+//     const now = Date.now();
 
-    chartDataCache.forEach((value, key) => {
-        if (now - value.timestamp > CACHE_TIMEOUT) {
-            chartDataCache.delete(key);
-        }
-    });
+//     chartDataCache.forEach((value, key) => {
+//         if (now - value.timestamp > CACHE_TIMEOUT) {
+//             chartDataCache.delete(key);
+//         }
+//     });
 
-    if (pacMedChart && !document.getElementById('pacMedChart')) {
-        pacMedChart.destroy();
-        pacMedChart = null;
-    }
-}
+//     if (pacMedChart && !document.getElementById('pacMedChart')) {
+//         pacMedChart.destroy();
+//         pacMedChart = null;
+//     }
+// }
 
 // Cleanup on page unload
 window.addEventListener('beforeunload', function() {
