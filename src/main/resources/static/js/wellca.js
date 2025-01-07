@@ -13,7 +13,26 @@ document.addEventListener('DOMContentLoaded', function() {
     setupServicesForm();
     initializeTabs();
     setupFormHandlers();
-    document.getElementById('date').valueAsDate = new Date();
+    
+    // Fix for date input initialization
+    const dateInput = document.getElementById('date');
+    if (dateInput) {
+        // Get today's date and set it at noon to avoid timezone issues
+        const today = new Date();
+        today.setHours(12, 0, 0, 0);
+        dateInput.value = today.toISOString().split('T')[0];
+    }
+
+    // Initialize start and end dates for reports
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    if (startDateInput && endDateInput) {
+        const today = new Date();
+        today.setHours(12, 0, 0, 0);
+        const formattedDate = today.toISOString().split('T')[0];
+        startDateInput.value = formattedDate;
+        endDateInput.value = formattedDate;
+    }
 
     if (!messageContainer) {
         messageContainer = document.createElement('div');
@@ -296,9 +315,9 @@ async function refreshReportData() {
             return;
         }
 
-        // Format dates to ISO format (YYYY-MM-DD)
-        const startDate = new Date(startDateInput.value).toISOString().split('T')[0];
-        const endDate = new Date(endDateInput.value).toISOString().split('T')[0];
+        // Use the input values directly without Date object conversion
+        const startDate = startDateInput.value;
+        const endDate = endDateInput.value;
         
         console.log('Date range:', startDate, 'to', endDate);
 

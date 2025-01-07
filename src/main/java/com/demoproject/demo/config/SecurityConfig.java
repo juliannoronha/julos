@@ -30,6 +30,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import java.io.IOException;
 import java.io.PrintWriter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import java.util.Arrays;
 
 /* --------------------------------------------------------------------------
  * Core Security Configuration
@@ -55,6 +58,9 @@ public class SecurityConfig {
 
     private final UserRepository userRepository;
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+
+    @Autowired
+    private Environment environment;
 
     public SecurityConfig(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -88,9 +94,16 @@ public class SecurityConfig {
     
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // Check if we're in test profile
+        if (Arrays.asList(environment.getActiveProfiles()).contains("test")) {
+            http.requiresChannel(channel -> channel
+                .anyRequest().requiresInsecure());
+        } else {
+            http.requiresChannel(channel -> channel
+                .anyRequest().requiresSecure());
+        }
+
         http
-            .requiresChannel(channel -> channel.anyRequest().requiresSecure())
-            
             .authorizeHttpRequests(authz -> authz
                 // Static resources and public pages
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/*.png", "/*.ico", "/h2-console/**").permitAll()

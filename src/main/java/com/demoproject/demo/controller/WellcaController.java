@@ -227,9 +227,12 @@ public class WellcaController {
             dto.getActivePercentage() : BigDecimal.ZERO);
 
         // Handle service fields explicitly
-        logger.debug("Processing service data - Type: {}, Cost: {}", dto.getServiceType(), dto.getServiceCost());
+        logger.debug("Processing service data - Type: {}, Cost: {}, Name: {}, DOB: {}, Pharmacist: {}", dto.getServiceType(), dto.getServiceCost(), dto.getPatientName(), dto.getPatientDob(), dto.getPharmacistName());
         entity.setServiceType(dto.getServiceType());
         entity.setServiceCost(dto.getServiceCost());
+        entity.setPatientName(dto.getPatientName());
+        entity.setPatientDob(dto.getPatientDob());
+        entity.setPharmacistName(dto.getPharmacistName());
 
         logger.debug("Converted entity service data: type={}, cost={}", entity.getServiceType(), entity.getServiceCost());
         return entity;

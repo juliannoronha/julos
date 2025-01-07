@@ -31,8 +31,8 @@ document.addEventListener('DOMContentLoaded', function() {
     //     setupSSEConnection(); 
     // }
     
-    // Periodic cleanup to prevent memory leaks
-    chartCleanupInterval = setInterval(cleanupChartResources, 5 * 60 * 1000);
+    // // Periodic cleanup to prevent memory leaks
+    // chartCleanupInterval = setInterval(cleanupChartResources, 5 * 60 * 1000);
 });
 
 /* -----------------------------------------------------------------------------
@@ -127,21 +127,21 @@ function handleUnauthorizedAccess(url) {
  * Navigation Handlers (TEMP DISABLED - PAC)
  * -------------------------------------------------------------------------- */
 
-/**
- * Handles PacMed section access
- * @param {Event} event - Click event
- */
-function handlePacMedClick(event) {
-    event.preventDefault();
-    const pacmedButton = document.getElementById('pacmedButton');
+// /**
+//  * Handles PacMed section access
+//  * @param {Event} event - Click event
+//  */
+// function handlePacMedClick(event) {
+//     event.preventDefault();
+//     const pacmedButton = document.getElementById('pacmedButton');
     
-    if (hasRequiredRole()) {
-        window.location.href = '/packmed';
-    } else {
-        showAccessDeniedMessage();
-        flashButton(pacmedButton);
-    }
-}
+//     if (hasRequiredRole()) {
+//         window.location.href = '/packmed';
+//     } else {
+//         showAccessDeniedMessage();
+//         flashButton(pacmedButton);
+//     }
+// }
 
 /**
  * Handles Wellca section access
@@ -428,15 +428,15 @@ function flashButton(button) {
 //     }
 // }
 
-// Cleanup on page unload
-window.addEventListener('beforeunload', function() {
-    if (chartCleanupInterval) clearInterval(chartCleanupInterval);
-    if (pacMedChart) {
-        pacMedChart.destroy();
-        pacMedChart = null;
-    }
-    chartDataCache.clear();
-});
+// // Cleanup on page unload
+// window.addEventListener('beforeunload', function() {
+//     if (chartCleanupInterval) clearInterval(chartCleanupInterval);
+//     if (pacMedChart) {
+//         pacMedChart.destroy();
+//         pacMedChart = null;
+//     }
+//     chartDataCache.clear();
+// });
 
 // Initial data fetch
 // document.addEventListener('DOMContentLoaded', fetchOverallProductivity);
