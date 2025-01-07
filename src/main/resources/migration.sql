@@ -29,3 +29,13 @@ UPDATE user_answer ua
 SET submission_date = DATE(p.start_time)
 FROM pac p
 WHERE ua.id = p.user_answer_id;
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id BIGSERIAL PRIMARY KEY,
+    action VARCHAR(255),
+    entity_type VARCHAR(255),
+    entity_id VARCHAR(255),
+    user_id VARCHAR(255),
+    timestamp TIMESTAMP,
+    details TEXT
+);
