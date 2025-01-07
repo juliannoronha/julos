@@ -944,8 +944,9 @@ function updateServiceBreakdown(data) {
 function formatDate(dateString) {
     if (!dateString) return 'N/A';
     try {
+        // Add one day to compensate for timezone display issue
         const date = new Date(dateString);
-        if (isNaN(date.getTime())) return 'Invalid Date';
+        date.setDate(date.getDate() + 1);
         return date.toLocaleDateString();
     } catch (error) {
         console.error('Error formatting date:', error);
@@ -1068,26 +1069,5 @@ function renderServiceBreakdown(data) {
                 }
             });
         });
-    }
-}
-
-// Helper function to format service type display
-function formatServiceType(type) {
-    if (!type) return 'Unknown';
-    return type.split('_').map(word => 
-        word.charAt(0) + word.slice(1).toLowerCase()
-    ).join(' ');
-}
-
-// Helper function to format dates
-function formatDate(dateString) {
-    if (!dateString) return 'N/A';
-    try {
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return 'Invalid Date';
-        return date.toLocaleDateString();
-    } catch (error) {
-        console.error('Error formatting date:', error);
-        return 'Invalid Date';
     }
 }
