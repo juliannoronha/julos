@@ -25,10 +25,11 @@
 document.addEventListener('DOMContentLoaded', function() {
     initWelcomeMessage();
     
-    if (hasRequiredRole()) {
-        fetchOverallProductivity();
-        setupSSEConnection(); 
-    }
+    // Temporarily disabled PAC functionality
+    // if (hasRequiredRole()) {
+    //     fetchOverallProductivity();
+    //     setupSSEConnection(); 
+    // }
     
     // Periodic cleanup to prevent memory leaks
     chartCleanupInterval = setInterval(cleanupChartResources, 5 * 60 * 1000);
