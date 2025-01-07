@@ -438,5 +438,5 @@ window.addEventListener('beforeunload', function() {
 });
 
 // Initial data fetch
-document.addEventListener('DOMContentLoaded', fetchOverallProductivity);
+// document.addEventListener('DOMContentLoaded', fetchOverallProductivity);
 
