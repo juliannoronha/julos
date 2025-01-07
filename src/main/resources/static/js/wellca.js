@@ -953,15 +953,6 @@ function formatDate(dateString) {
         return 'Invalid Date';
     }
 }
-
-// Helper function to format service type display
-function formatServiceType(type) {
-    if (!type) return 'Unknown';
-    return type.split('_').map(word => 
-        word.charAt(0) + word.slice(1).toLowerCase()
-    ).join(' ');
-}
-
 // Update the service breakdown rendering
 function renderServiceBreakdown(data) {
     console.log('=== Render Service Breakdown ===');
