@@ -59,13 +59,16 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAnswer> userAnswers;
 
+
+    /* Temporarily Disabled */
     /**
      * @note Initialized to prevent NPE
      * @note Maintains PAC session history
      */
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Pac> pacs = new ArrayList<>();
+    // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    // private List<Pac> pacs = new ArrayList<>();
 
+    
     /* .... Role Enumeration .... */
     /**
      * System roles defining user permissions
