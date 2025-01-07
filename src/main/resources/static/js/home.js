@@ -338,7 +338,7 @@ function flashButton(button) {
 //         eventSource.close();
 //         setTimeout(setupSSEConnection, 5000);
 //     };
-}
+// }
 
 /* -----------------------------------------------------------------------------
  * Chart Management (TEMP DISABLED - PAC)
