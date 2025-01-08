@@ -3,21 +3,19 @@
  * ================================================================= */
 
 :root {
-    /* Color Variables */
-    --primary-bg: #1a1a1a;
-    --secondary-bg: #2a2a2a;
-    --hover-bg: rgba(255, 255, 255, 0.1);
+    /* Color scheme */
+    --primary-bg: #2a2a2a;
+    --secondary-bg: #333333;
     --text-primary: #ffffff;
     --text-secondary: #888888;
-    --accent-color: #03C9D7;
-    --notification-dot: rgb(254, 201, 15);
-    --error-color: #ff6b6b;
+    --hover-bg: rgba(255, 255, 255, 0.1);
+    --border-color: rgba(255, 255, 255, 0.1);
     
-    /* Layout Variables */
-    --navbar-width: 260px;
-    --navbar-collapsed-width: 70px;
-    --header-height: 70px;
-    --content-padding: 20px;
+    /* Layout measurements */
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 80px;
+    --header-height: 60px;
+    --transition-speed: 0.3s;
 }
 
 /* Base Layout */
@@ -31,18 +29,17 @@ body {
     min-height: 100vh;
 }
 
-/* Main Navigation */
+/* Navigation Layout */
 nav {
-    width: var(--navbar-width);
-    background-color: var(--secondary-bg);
+    width: var(--sidebar-width);
     height: 100vh;
     position: fixed;
     left: 0;
     top: 0;
-    display: flex;
-    flex-direction: column;
-    transition: width 0.3s ease;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    background-color: var(--secondary-bg);
+    border-right: 1px solid var(--border-color);
+    transition: width var(--transition-speed) ease;
+    overflow-x: hidden;
     z-index: 1000;
 }
 
@@ -51,46 +48,48 @@ nav {
     padding: 1.5rem;
     display: flex;
     align-items: center;
-    justify-content: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .logo img {
-    max-width: 150px;
-    height: auto;
+    height: 40px;
+    width: auto;
 }
 
 /* Navigation Lists */
 nav ul {
     list-style: none;
     padding: 0;
-    margin: 0;
-}
-
-nav .panel, 
-nav .admin-panel {
     margin: 1rem 0;
 }
 
-nav .panel > span,
-nav .admin-panel > span {
-    padding: 0.75rem 1.5rem;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    display: block;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+.panel, .admin-panel {
+    margin: 0.5rem 1rem;
+    background-color: var(--primary-bg);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-/* Navigation Items */
+.panel > span, .admin-panel > span {
+    display: block;
+    padding: 1rem;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+/* Navigation Links */
 nav ul li a {
     display: flex;
     align-items: center;
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem 1rem;
     color: var(--text-primary);
     text-decoration: none;
-    transition: background-color 0.2s ease;
-    position: relative;
+    transition: background-color var(--transition-speed);
+    border-radius: 6px;
+    margin: 0.25rem 0.5rem;
 }
 
 nav ul li a:hover {
@@ -100,246 +99,5 @@ nav ul li a:hover {
 nav ul li a i {
     width: 24px;
     margin-right: 12px;
-    font-size: 1.2rem;
-}
-
-/* Notification Dots */
-.notification-dot {
-    position: absolute;
-    top: 12px;
-    right: 24px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: var(--notification-dot);
-}
-
-/* Logout Section */
-.logout {
-    margin-top: auto;
-    padding: 1.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.logout button {
-    width: 100%;
-    padding: 0.75rem;
-    background-color: transparent;
-    border: 1px solid var(--accent-color);
-    color: var(--text-primary);
-    border-radius: 5px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s ease;
-}
-
-.logout button:hover {
-    background-color: var(--accent-color);
-}
-
-.logout button i {
-    margin-right: 8px;
-}
-
-/* =================================================================
- * Responsive Navigation & Header Styles
- * ================================================================= */
-
-/* Main Content Area */
-.main-content {
-    margin-left: var(--navbar-width);
-    flex: 1;
-    transition: margin-left 0.3s ease;
-    min-height: 100vh;
-}
-
-/* Header Section */
-.header {
-    height: var(--header-height);
-    background-color: var(--secondary-bg);
-    padding: 0 var(--content-padding);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 999;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-/* Profile Section */
-.profile-section {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.profile-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.profile-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.profile-name {
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.profile-role {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-}
-
-/* Header Actions */
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.action-button {
-    background: transparent;
-    border: none;
-    color: var(--text-primary);
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.action-button:hover {
-    background-color: var(--hover-bg);
-}
-
-/* Mobile Navigation Toggle */
-.nav-toggle {
-    display: none;
-    background: transparent;
-    border: none;
-    color: var(--text-primary);
-    cursor: pointer;
-    padding: 0.5rem;
-}
-
-/* Collapsed Navigation State */
-.nav-collapsed {
-    width: var(--navbar-collapsed-width);
-}
-
-.nav-collapsed .logo img {
-    max-width: 40px;
-}
-
-.nav-collapsed .nav-text,
-.nav-collapsed .panel > span,
-.nav-collapsed .admin-panel > span {
-    display: none;
-}
-
-.nav-collapsed + .main-content {
-    margin-left: var(--navbar-collapsed-width);
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideIn {
-    from { transform: translateX(-100%); }
-    to { transform: translateX(0); }
-}
-
-.fade-in {
-    animation: fadeIn 0.3s ease forwards;
-}
-
-.slide-in {
-    animation: slideIn 0.3s ease forwards;
-}
-
-/* Responsive Breakpoints */
-@media (max-width: 1024px) {
-    :root {
-        --navbar-width: 220px;
-    }
-    
-    .profile-info {
-        display: none;
-    }
-}
-
-@media (max-width: 768px) {
-    .nav-toggle {
-        display: block;
-    }
-    
-    nav {
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-    }
-    
-    nav.active {
-        transform: translateX(0);
-    }
-    
-    .main-content {
-        margin-left: 0;
-    }
-    
-    .header-actions {
-        gap: 0.5rem;
-    }
-    
-    .action-button {
-        width: 35px;
-        height: 35px;
-    }
-}
-
-@media (max-width: 480px) {
-    :root {
-        --content-padding: 10px;
-    }
-    
-    .header {
-        padding: 0 0.5rem;
-    }
-    
-    .action-button {
-        width: 32px;
-        height: 32px;
-    }
-}
-
-/* Overlay for Mobile Navigation */
-.nav-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-}
-
-@media (max-width: 768px) {
-    .nav-overlay.active {
-        display: block;
-    }
+    font-size: 1.1rem;
 }
