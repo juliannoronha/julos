@@ -350,3 +350,61 @@ nav.collapsed .logout {
 nav.collapsed .logout button span {
     display: none;
 }
+
+/* Access Denied Message Styling */
+.access-denied-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: var(--secondary-bg);
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    transform: translateX(150%);
+    opacity: 0;
+    z-index: 1000;
+}
+
+.access-denied-message p {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    font-size: 0.95rem;
+}
+
+.access-denied-message p::before {
+    content: '⚠️';
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+/* Animation states */
+.access-denied-message.show {
+    animation: slideIn 0.5s ease forwards,
+               fadeOut 0.5s ease 2.5s forwards;
+}
+
+/* Keyframe Animations */
+@keyframes slideIn {
+    0% {
+        transform: translateX(150%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(150%);
+        opacity: 0;
+    }
+}
