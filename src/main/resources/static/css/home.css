@@ -1,184 +1,728 @@
 /* =================================================================
- * Home Page Styles
- * Purpose: Defines styles for the main dashboard and navigation
- * Dependencies: Font Awesome, Montserrat font
+ * Core Layout & Variables
  * ================================================================= */
 
-/* -----------------------------------------------------------------
- * Animations
- * @note: Defines core entrance animations for UI elements
- * ----------------------------------------------------------------- */
-
-@keyframes slideInFade {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
+:root {
+    /* Color scheme */
+    --primary-bg: #2a2a2a;
+    --secondary-bg: #333333;
+    --text-primary: #ffffff;
+    --text-secondary: #888888;
+    --hover-bg: rgba(255, 255, 255, 0.1);
+    --border-color: rgba(255, 255, 255, 0.1);
+    
+    /* Layout measurements */
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 80px;
+    --header-height: 60px;
+    --transition-speed: 0.3s;
 }
 
-@keyframes fadeInFromTop {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+/* Base Layout */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--primary-bg);
+    color: var(--text-primary);
+    display: flex;
+    min-height: 100vh;
 }
 
-/* Animation timing assignments for navigation elements
- * @note: Staged entrance creates a cascading effect */
-nav, nav .logo, nav ul li, nav .logout, .main-top {
-    opacity: 0;
-    animation: slideInFade 0.5s ease-out forwards;
+/* Navigation Layout */
+nav {
+    width: var(--sidebar-width);
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: var(--secondary-bg);
+    border-right: 1px solid var(--border-color);
+    transition: width var(--transition-speed) ease;
+    overflow-x: hidden;
+    z-index: 1000;
 }
 
-/* Cascading animation delays for nav elements
- * @performance: Consider reducing delays for faster initial load */
-nav .logo { animation-delay: 0.2s; }
-nav ul li:nth-child(1) { animation-delay: 0.4s; }
-nav ul li:nth-child(2) { animation-delay: 0.6s; }
-nav ul li:nth-child(3) { animation-delay: 0.8s; }
-nav .logout { animation-delay: 1s; }
-
-/* -----------------------------------------------------------------
- * Navigation Layout
- * @purpose: Core navigation structure and spacing
- * ----------------------------------------------------------------- */
-
+/* Logo Section */
 .logo {
-    margin-bottom: 0;
-    padding-bottom: 1rem;
+    padding: 1.5rem 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1rem;
 }
 
+.logo img {
+    height: 80px;
+    width: auto;
+}
+
+/* Navigation Lists */
 nav ul {
-    margin-top: 0;
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
 }
-
-/* -----------------------------------------------------------------
- * Panel Components
- * @purpose: Styles for admin and general panels
- * @note: Shared between admin and regular panels for consistency
- * ----------------------------------------------------------------- */
 
 .panel, .admin-panel {
-    width: 100%;
-    text-align: left;
+    margin: 0.5rem 1rem;
+    background-color: var(--primary-bg);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-/* Panel headers */
 .panel > span, .admin-panel > span {
     display: block;
-    padding: 10px 1.5rem;
-    color: #ffffff;
-    font-weight: bold;
-    font-size: 1em;
-    margin-bottom: 10px;
-}
-
-/* Panel navigation lists
- * @accessibility: Removes default list styling for cleaner navigation */
-.panel ul, .admin-panel ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-.panel ul li, .admin-panel ul li {
-    width: 100%;
-}
-
-/* Panel link styling
- * @note: Consistent padding for touch targets */
-.panel ul li a, .admin-panel ul li a {
-    padding: 1rem 1.5rem;
-}
-
-/* Icon styling within panels
- * @dependency: Requires Font Awesome */
-.panel ul li a i, .admin-panel ul li a i {
-    width: 24px;
-    font-size: 18px;
-    margin-right: 10px;
-    flex-shrink: 0;
-}
-
-/* -----------------------------------------------------------------
- * Main Content Layout
- * @purpose: Primary content structure and dashboard
- * ----------------------------------------------------------------- */
-
-.main {
-    display: flex;
-    justify-content: space-between;
-    padding: 20px;
-}
-
-.content-wrapper {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Dashboard Card
- * @note: Fixed positioning with animation entrance
- * @performance: Uses GPU acceleration for animations */
-.dashboard {
-    position: fixed;
-    background-color: #2a2a2a;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    width: 300px;
-    margin-left: 20px;
-    align-self: flex-start;
-    top: 20px;
-    opacity: 0;
-    animation: slideInFade 0.5s ease-out forwards;
-    animation-delay: 1.2s;
-}
-
-/* Dashboard Components
- * @purpose: Styles for dashboard elements and statistics display */
-.dashboard h3 {
-    margin-top: 0;
-    margin-bottom: 20px;
-    text-align: center;
-    color: #ffffff;
-}
-
-.dashboard-item {
-    margin-bottom: 15px;
-}
-
-.dashboard-item-label {
-    font-size: 0.9em;
-    color: #888;
-}
-
-.dashboard-item-value {
-    font-size: 1.2em;
-    color: #ffffff;
+    padding: 1rem;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    color: var(--text-secondary);
     font-weight: 600;
 }
 
-/* -----------------------------------------------------------------
+/* Navigation Links */
+nav ul li a {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: background-color var(--transition-speed);
+    border-radius: 6px;
+    margin: 0.25rem 0.5rem;
+}
+
+nav ul li a:hover {
+    background-color: var(--hover-bg);
+}
+
+nav ul li a i {
+    width: 24px;
+    margin-right: 12px;
+    font-size: 1.1rem;
+}
+
+/* =================================================================
+ * Animations & Transitions
+ * ================================================================= */
+
+.fade-out {
+    opacity: 0;
+    transition: opacity var(--transition-speed) ease;
+}
+
+.fade-in {
+    opacity: 1;
+    transition: opacity var(--transition-speed) ease;
+}
+
+/* =================================================================
+ * Responsive Design
+ * ================================================================= */
+
+/* Mobile Navigation */
+@media (max-width: 768px) {
+    nav {
+        width: var(--sidebar-collapsed-width);
+        transform: translateX(-100%);
+    }
+
+    nav.active {
+        transform: translateX(0);
+        width: var(--sidebar-width);
+    }
+
+    .nav-text {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity var(--transition-speed);
+    }
+
+    nav.active .nav-text {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+}
+
+/* =================================================================
+ * Component Styling
+ * ================================================================= */
+
+/* Profile Section */
+.profile-section {
+    padding: 1rem;
+    border-top: 1px solid var(--border-color);
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.profile-role {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Panel Styling */
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.panel-content {
+    padding: 1rem;
+}
+
+/* =================================================================
  * Utility Classes
- * @purpose: Helper styles for messages and charts
- * ----------------------------------------------------------------- */
+ * ================================================================= */
 
-.welcome-message {
-    margin-bottom: 20px;
+.hidden {
+    display: none !important;
 }
 
-.welcome-message h1 {
-    color: #ffffff;
+.flex {
+    display: flex;
 }
 
-/* Error message styling
- * @accessibility: Uses semantic colors for error states */
-.access-denied-message {
-    color: #ff6b6b;
+.items-center {
+    align-items: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.text-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Main Content Area - Updated */
+.main {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+    padding: 2rem;
+    display: flex;
+    transition: margin-left var(--transition-speed);
+}
+
+.content-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 15vh; /* This pushes the content down from the top */
+}
+
+/* Collapsed Sidebar States */
+
+nav.collapsed #wellcaButton,
+nav.collapsed #nbaButton {
+    font-size: 0; /* Hide all text */
+}
+
+/* Restore icon size */
+nav.collapsed #wellcaButton i,
+nav.collapsed #nbaButton i {
+    font-size: 1.1rem;
+}
+
+/* Ensure text content is hidden */
+nav.collapsed #wellcaButton > *:not(i),
+nav.collapsed #nbaButton > *:not(i) {
     display: none;
 }
 
-/* Chart container
- * @dependency: Requires Chart.js
- * @note: Fixed height for consistent layout */
-.dashboard-chart {
-    margin-top: 20px;
-    height: 200px;
+/* Additional specificity for text nodes */
+nav.collapsed #wellcaButton::after,
+nav.collapsed #nbaButton::after {
+    display: none;
+}
+
+
+nav.collapsed {
+    width: var(--sidebar-collapsed-width);
+}
+
+nav.collapsed + .main {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+/* Hide text in collapsed state for specific panels */
+nav.collapsed .admin-panel a {
+    font-size: 0; /* This will hide the text */
+}
+
+nav.collapsed .admin-panel a i {
+    font-size: 1.1rem; /* Restore the icon size */
+}
+
+/* Or alternatively, we can target the text specifically */
+nav.collapsed .admin-panel a > span,
+nav.collapsed .admin-panel a::after {
+    display: none;
+}
+
+/* Update panel visibility in collapsed state */
+nav.collapsed .panel > span,
+nav.collapsed .admin-panel > span,
+nav.collapsed .central-fill-panel > span,
+nav.collapsed .sports-panel > span {
+    display: none;
+}
+
+nav.collapsed .nav-text,
+nav.collapsed .profile-info {
+    display: none;
+}
+
+nav.collapsed .panel,
+nav.collapsed .admin-panel,
+nav.collapsed .central-fill-panel,
+nav.collapsed .sports-panel {
+    background-color: transparent;
+    margin: 0.5rem;
+    padding: 0;
+}
+
+nav.collapsed .logo img {
+    height: 35px;
+    width: auto;
+}
+
+/* Adjust icon positioning in collapsed state */
+nav.collapsed ul li a {
+    justify-content: center;
+    padding: 0.75rem;
+}
+
+nav.collapsed ul li a i {
+    margin-right: 0;
+}
+
+/* TODO: Access Denied Fix
+ * - Implement authentication check before page load for Well.ca
+ * - Add proper error logging for unauthorized access attempts
+ */
+
+
+/* Access Denied Message Styling */
+.access-denied-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: var(--secondary-bg);
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    transform: translateX(150%);
+    opacity: 0;
+    z-index: 1000;
+}
+
+.access-denied-message p {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    font-size: 0.95rem;
+}
+
+.access-denied-message p::before {
+    content: '⚠️';
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+/* Animation states */
+.access-denied-message.show {
+    animation: slideIn 0.5s ease forwards,
+               fadeOut 0.5s ease 2.5s forwards;
+}
+
+/* =================================================================
+ * Navbar Styling
+ * ================================================================= */
+
+.navbar-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: var(--sidebar-width);
+    height: var(--header-height);
+    background-color: var(--secondary-bg);
+    border-bottom: 1px solid var(--border-color);
+    transition: left var(--transition-speed);
+    z-index: 900;
+}
+
+.navbar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem;
+    height: 100%;
+}
+
+/* Navigation Buttons */
+.nav-items {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-button {
+    position: relative;
+}
+
+.nav-button button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+}
+
+.nav-button button:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Notification Dots */
+.notification-dot::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: attr(data-dot-color);
+}
+
+/* Profile Section */
+.profile-button {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+}
+
+.profile-button:hover {
+    background-color: var(--hover-bg);
+}
+
+.profile-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-info {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.greeting {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.username {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+/* Navigation Panels */
+.nav-panel {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    min-width: 300px;
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .navbar-container {
+        left: 0;
+    }
+
+    .profile-info {
+        display: none;
+    }
+}
+
+/* Collapsed Sidebar State */
+nav.collapsed + .navbar-container {
+    left: var(--sidebar-collapsed-width);
+}
+
+/* Add these to your existing CSS */
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.notification-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.notification-title p {
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: var(--text-primary);
+}
+
+.new-notifications-badge {
+    background-color: #FEC90F;
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    border: none;
+}
+
+.close-button {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background-color var(--transition-speed);
+}
+
+.close-button:hover {
+    background-color: var(--hover-bg);
+}
+
+.notification-content {
+    padding: 1rem;
+}
+
+.notification-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.notification-item img {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.notification-item-content {
+    flex: 1;
+}
+
+.notification-message {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.notification-desc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.notification-footer {
+    margin-top: 1rem;
+}
+
+.see-all-button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--secondary-bg);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+}
+
+.see-all-button:hover {
+    background-color: var(--hover-bg);
+}
+
+/* User Profile Panel Styles */
+#userProfilePanel {
+    min-width: 360px;
+    padding: 1.5rem;
+}
+
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.profile-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+} 
+
+.profile-action-item {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+}
+
+.profile-action-item:hover {
+    background-color: var(--hover-bg);
+    border-radius: 0.55rem;
+}
+
+.action-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: #ffffff;
+    background: transparent;
+}
+
+.action-details {
+    flex: 1;
+}
+
+.action-title {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.profile-footer {
+    margin-top: 1.5rem;
+}
+
+.logout-button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--secondary-bg);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.logout-button:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Welcome Message Animation */
+.welcome-message {
+    flex: 1;
+    text-align: center;
+    overflow: hidden;
+}
+
+.greeting-text {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    animation: slideIn 0.5s ease-out;
+    margin: 0;
+}
+
+.user-greeting {
+    color: #03C9D7;
+}
+
+@keyframes slideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Add animation out when closing */
+#userProfilePanel.closing .greeting-text {
+    animation: slideOut 0.3s ease-in;
+}
+
+@keyframes slideOut {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
 }

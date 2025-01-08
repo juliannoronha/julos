@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Page</title>
-    <link rel="stylesheet" th:href="@{/css/styles2.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/home.css}">
@@ -48,18 +47,105 @@
                     </div>
                 </li>
             </ul>
-            <div class="logout">
-                <form th:action="@{/logout}" method="post" onsubmit="return fadeOutAndSubmit(this, event)">
-                    <button type="submit" class="button"><i class="fas fa-sign-out-alt"></i> Logout</button>
-                </form>
-            </div>
         </div>
     </nav>
+
+    <!-- Move navbar container here, directly after the nav -->
+    <div class="navbar-container">
+        <div class="navbar-content">
+            <!-- Menu Button -->
+            <div class="nav-button" title="Menu">
+                <button type="button" onclick="handleActiveMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <!-- Right Side Navigation Items -->
+            <div class="nav-items">
+                <!-- Chat Button -->
+                <div class="nav-button" title="Chat">
+                    <button type="button" onclick="handleNavClick('chat')" class="notification-dot" data-dot-color="#03C9D7">
+                        <i class="fas fa-comment"></i>
+                    </button>
+                </div>
+
+                <!-- Notification Button -->
+                <div class="nav-button" title="Notifications">
+                    <button type="button" onclick="handleNavClick('notification')" class="notification-dot" data-dot-color="#FEC90F">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                </div>
+
+                <!-- Notification Panel -->
+                <div id="notificationPanel" class="nav-panel" style="display: none;">
+                    <div class="notification-header">
+                        <div class="notification-title">
+                            <p>Notifications</p>
+                            <button type="button" class="new-notifications-badge">New</button>
+                        </div>
+                        <button type="button" class="close-button" onclick="handleNavClick('notification')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-list" th:if="${notifications!= null}">
+                            <!-- This will be populated dynamically via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Section -->
+                <div class="profile-button" onclick="handleNavClick('userProfile')">
+                    <div class="profile-info">
+                        <span class="greeting">Hi,</span>
+                        <span class="username" th:text="${#authentication.name}">User</span>
+                    </div>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+
+                <!-- User Profile Panel -->
+                <div id="userProfilePanel" class="nav-panel" style="display: none;">
+                    <div class="profile-header">
+                        <div class="welcome-message">
+                            <p class="greeting-text">
+                                <span class="user-greeting" th:text="${#authentication.name}">Admin</span>
+                            </p>
+                        </div>
+                        <button type="button" class="close-button" onclick="handleNavClick('userProfile')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="profile-actions">
+                        <div class="profile-action-item" onclick="handleProfileAction('settings')">
+                            <button type="button" class="action-icon">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            <div class="action-details">
+                                <p class="action-title">Account Settings</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-footer">
+                        <form th:action="@{/logout}" method="post" onsubmit="return fadeOutAndSubmit(this, event)">
+                            <button type="submit" class="logout-button">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dropdown Panels -->
+        <div id="chatPanel" class="nav-panel" style="display: none;">
+            <!-- Chat content -->
+        </div>
+    </div>
+
     <div class="main" id="mainContent">
         <div class="content-wrapper">
-            <div class="welcome-message" id="welcomeMessage">
-                <h1>Hello, <span th:text="${#authentication.name}">User</span>!</h1>
-            </div>
             <div id="accessDeniedMessage" class="access-denied-message" aria-live="polite">
                 <p>You do not have access to this page!</p>
             </div>
@@ -72,6 +158,5 @@
         /*]]>*/
     </script>
     <script th:src="@{/js/home.js}"></script>
-    
 </body>
 </html>

@@ -441,3 +441,168 @@ function flashButton(button) {
 // Initial data fetch
 // document.addEventListener('DOMContentLoaded', fetchOverallProductivity);
 
+function handleNavClick(panel) {
+    const panels = ['chat', 'notification', 'userProfile'];
+    panels.forEach(p => {
+        const element = document.getElementById(`${p}Panel`);
+        if (element) {
+            if (p === panel) {
+                const isOpening = element.style.display === 'none';
+                if (isOpening) {
+                    element.classList.remove('closing');
+                    element.style.display = 'block';
+                } else {
+                    element.classList.add('closing');
+                    // Wait for animation to complete before hiding
+                    setTimeout(() => {
+                        element.style.display = 'none';
+                        element.classList.remove('closing');
+                    }, 300); // Match animation duration
+                }
+            } else {
+                element.style.display = 'none';
+            }
+        }
+    });
+}
+
+function handleActiveMenu() {
+    const nav = document.getElementById('mainNav');
+    nav.classList.toggle('collapsed');
+}
+
+// Close panels when clicking outside
+document.addEventListener('click', (event) => {
+    if (!event.target.closest('.nav-button') && 
+        !event.target.closest('.nav-panel') && 
+        !event.target.closest('.profile-button')) {
+        document.querySelectorAll('.nav-panel').forEach(panel => {
+            panel.style.display = 'none';
+        });
+    }
+});
+
+// Notification System
+let notificationSocket;
+let unreadNotifications = 0;
+
+/**
+ * Initialize the notification system
+ * This will be called when the notification panel is opened
+ */
+function initializeNotifications() {
+    const notificationList = document.querySelector('.notification-list');
+    if (!notificationList) return;
+
+    // Initially show a placeholder or loading state
+    notificationList.innerHTML = `
+        <div class="notification-item">
+            <div class="notification-item-content">
+                <p class="notification-message">No new notifications</p>
+            </div>
+        </div>
+    `;
+
+    // Setup WebSocket when you're ready to implement real-time notifications
+    // setupNotificationSocket();
+}
+
+/**
+ * Add a new notification to the list
+ * @param {Object} notification - { type, message, desc, image }
+ */
+function addNotification(notification) {
+    const notificationList = document.querySelector('.notification-list');
+    if (!notificationList) return;
+
+    // Remove the "No new notifications" placeholder if it exists
+    if (notificationList.querySelector('.notification-message')?.textContent === 'No new notifications') {
+        notificationList.innerHTML = '';
+    }
+
+    const notificationElement = document.createElement('div');
+    notificationElement.className = 'notification-item';
+    notificationElement.innerHTML = `
+        <img src="${notification.image || '/images/default-notification.png'}" alt="notification" />
+        <div class="notification-item-content">
+            <p class="notification-message">${notification.message}</p>
+            ${notification.desc ? `<p class="notification-desc">${notification.desc}</p>` : ''}
+        </div>
+    `;
+
+    // Add new notification at the top of the list
+    notificationList.insertBefore(notificationElement, notificationList.firstChild);
+    updateNotificationBadge(1);
+}
+
+/**
+ * Update the notification badge count
+ * @param {number} increment - Number to increment by (or exact number if setExact is true)
+ * @param {boolean} setExact - If true, set the count to increment value instead of incrementing
+ */
+function updateNotificationBadge(increment = 0, setExact = false) {
+    const badge = document.querySelector('.new-notifications-badge');
+    if (!badge) return;
+
+    if (setExact) {
+        unreadNotifications = increment;
+    } else {
+        unreadNotifications += increment;
+    }
+
+    badge.textContent = `${unreadNotifications} New`;
+    badge.style.display = unreadNotifications > 0 ? 'block' : 'none';
+}
+
+/**
+ * Clear all notifications
+ */
+function clearNotifications() {
+    const notificationList = document.querySelector('.notification-list');
+    if (!notificationList) return;
+
+    notificationList.innerHTML = `
+        <div class="notification-item">
+            <div class="notification-item-content">
+                <p class="notification-message">No new notifications</p>
+            </div>
+        </div>
+    `;
+    updateNotificationBadge(0, true);
+}
+
+/**
+ * Setup WebSocket connection for real-time notifications
+ * To be implemented when ready for real-time features
+ */
+function setupNotificationSocket() {
+    // Commented out until ready to implement WebSocket
+    /*
+    notificationSocket = new WebSocket(`ws://${window.location.host}/ws/notifications`);
+    
+    notificationSocket.onmessage = function(event) {
+        const notification = JSON.parse(event.data);
+        addNotification(notification);
+    };
+
+    notificationSocket.onclose = function() {
+        setTimeout(setupNotificationSocket, 5000);
+    };
+    */
+}
+
+// Initialize notifications when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeNotifications();
+});
+
+/**
+ * Handle profile action clicks
+ * @param {string} action - The action type ('settings')
+ */
+function handleProfileAction(action) {
+    if (action === 'settings') {
+        window.location.href = '/settings';
+    }
+}
+
