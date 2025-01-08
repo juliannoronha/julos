@@ -39,13 +39,126 @@ nav .logout { animation-delay: 1s; }
  * @purpose: Core navigation structure and spacing
  * ----------------------------------------------------------------- */
 
+nav {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 250px;
+    background-color: #2a2a2a;
+    padding: 1rem;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.navbar {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
 .logo {
-    margin-bottom: 0;
-    padding-bottom: 1rem;
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+
+.logo img {
+    max-width: 150px;
+    height: auto;
 }
 
 nav ul {
-    margin-top: 0;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* Panel styling updates */
+.panel, .admin-panel {
+    margin-bottom: 1.5rem;
+    background-color: #333333;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+.panel:hover, .admin-panel:hover {
+    transform: translateX(5px);
+}
+
+.panel > span, .admin-panel > span {
+    background-color: #444444;
+}
+
+.panel ul li a, .admin-panel ul li a {
+    display: flex;
+    align-items: center;
+    color: #ffffff;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.panel ul li a:hover, .admin-panel ul li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Logout section */
+.logout {
+    margin-top: auto;
+    padding: 1rem;
+}
+
+.logout button {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: #444444;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s ease;
+}
+
+.logout button:hover {
+    background-color: #555555;
+}
+
+/* Main content adjustment */
+.main {
+    margin-left: 250px; /* Match nav width */
+    padding: 2rem;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 900px) {
+    nav {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    nav.active {
+        transform: translateX(0);
+    }
+
+    .main {
+        margin-left: 0;
+    }
+
+    .mobile-menu-toggle {
+        display: block;
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 1000;
+        background: #2a2a2a;
+        border: none;
+        color: white;
+        padding: 0.5rem;
+        border-radius: 4px;
+        cursor: pointer;
+    }
 }
 
 /* -----------------------------------------------------------------
