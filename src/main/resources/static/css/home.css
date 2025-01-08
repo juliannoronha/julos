@@ -222,24 +222,6 @@ nav ul li a i {
     padding: 1rem;
 }
 
-/* Button Styling */
-.nav-button {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1rem;
-    border-radius: 6px;
-    transition: background-color var(--transition-speed);
-    cursor: pointer;
-}
-
-.nav-button:hover {
-    background-color: var(--hover-bg);
-}
-
-.nav-button i {
-    margin-right: 12px;
-}
-
 /* =================================================================
  * Utility Classes
  * ================================================================= */
@@ -402,106 +384,6 @@ nav.collapsed .logout button span {
                fadeOut 0.5s ease 2.5s forwards;
 }
 
-/* Keyframe Animations */
-@keyframes slideIn {
-    0% {
-        transform: translateX(150%);
-        opacity: 0;
-    }
-    100% {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-@keyframes fadeOut {
-    0% {
-        transform: translateX(0);
-        opacity: 1;
-    }
-    100% {
-        transform: translateX(150%);
-        opacity: 0;
-    }
-}
-
-/* Welcome Message Styling & Animation */
-.welcome-message {
-    text-align: center;
-    padding: 2rem;
-    opacity: 0;
-    animation: welcomeAppear 1.2s ease forwards;
-}
-
-.welcome-message h1 {
-    font-size: 2.5rem;
-    margin: 0;
-    color: var(--text-primary);
-    position: relative;
-    display: inline-block;
-}
-
-.welcome-message h1 span {
-    color: #4a9eff;
-    position: relative;
-    display: inline-block;
-    animation: nameHighlight 0.8s ease forwards;
-    animation-delay: 0.8s;
-}
-
-.welcome-message h1::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 0;
-    width: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--secondary-bg), #4a9eff);
-    animation: lineGrow 0.6s ease forwards;
-    animation-delay: 1.4s;
-}
-
-@keyframes welcomeAppear {
-    0% {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes nameHighlight {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        color: #66b3ff;
-        transform: scale(1.1);
-    }
-    100% {
-        color: #4a9eff;
-        transform: scale(1);
-    }
-}
-
-@keyframes lineGrow {
-    0% {
-        width: 0;
-    }
-    100% {
-        width: 100%;
-    }
-}
-
-/* Responsive adjustment */
-@media (max-width: 768px) {
-    .main {
-        margin-left: 0;
-    }
-}
-
 /* =================================================================
  * Navbar Styling
  * ================================================================= */
@@ -632,4 +514,101 @@ nav.collapsed .logout button span {
 /* Collapsed Sidebar State */
 nav.collapsed + .navbar-container {
     left: var(--sidebar-collapsed-width);
+}
+
+/* Add these to your existing CSS */
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.notification-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.notification-title p {
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: var(--text-primary);
+}
+
+.new-notifications-badge {
+    background-color: #FEC90F;
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    border: none;
+}
+
+.close-button {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background-color var(--transition-speed);
+}
+
+.close-button:hover {
+    background-color: var(--hover-bg);
+}
+
+.notification-content {
+    padding: 1rem;
+}
+
+.notification-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.notification-item img {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.notification-item-content {
+    flex: 1;
+}
+
+.notification-message {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.notification-desc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.notification-footer {
+    margin-top: 1rem;
+}
+
+.see-all-button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--secondary-bg);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+}
+
+.see-all-button:hover {
+    background-color: var(--hover-bg);
 }

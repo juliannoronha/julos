@@ -98,7 +98,20 @@
             <!-- Chat content -->
         </div>
         <div id="notificationPanel" class="nav-panel" style="display: none;">
-            <!-- Notification content -->
+            <div class="notification-header">
+                <div class="notification-title">
+                    <p>Notifications</p>
+                    <button type="button" class="new-notifications-badge">New</button>
+                </div>
+                <button type="button" class="close-button" onclick="handleNavClick('notification')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="notification-content">
+                <div class="notification-list" th:if="${notifications !=null}">
+                    <!-- This will be populated dynamically via JavaScript -->
+                </div>
+            </div>
         </div>
         <div id="userProfilePanel" class="nav-panel" style="display: none;">
             <!-- User profile content -->
@@ -107,9 +120,6 @@
 
     <div class="main" id="mainContent">
         <div class="content-wrapper">
-            <div class="welcome-message" id="welcomeMessage">
-                <h1>Hello, <span th:text="${#authentication.name}">User</span>!</h1>
-            </div>
             <div id="accessDeniedMessage" class="access-denied-message" aria-live="polite">
                 <p>You do not have access to this page!</p>
             </div>
