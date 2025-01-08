@@ -54,24 +54,8 @@
             </div>
         </div>
     </nav>
-    <div class="main" id="mainContent">
-        <div class="content-wrapper">
-            <div class="welcome-message" id="welcomeMessage">
-                <h1>Hello, <span th:text="${#authentication.name}">User</span>!</h1>
-            </div>
-            <div id="accessDeniedMessage" class="access-denied-message" aria-live="polite">
-                <p>You do not have access to this page!</p>
-            </div>
-        </div>
-    </div>
 
-    <script th:inline="javascript">
-        /*<![CDATA[*/
-        var contextPath = /*[[@{/}]]*/ '';
-        /*]]>*/
-    </script>
-    <script th:src="@{/js/home.js}"></script>
-    
+    <!-- Move navbar container here, directly after the nav -->
     <div class="navbar-container">
         <div class="navbar-content">
             <!-- Menu Button -->
@@ -109,7 +93,7 @@
             </div>
         </div>
 
-        <!-- Dropdown Panels (initially hidden) -->
+        <!-- Dropdown Panels -->
         <div id="chatPanel" class="nav-panel" style="display: none;">
             <!-- Chat content -->
         </div>
@@ -120,5 +104,23 @@
             <!-- User profile content -->
         </div>
     </div>
+
+    <div class="main" id="mainContent">
+        <div class="content-wrapper">
+            <div class="welcome-message" id="welcomeMessage">
+                <h1>Hello, <span th:text="${#authentication.name}">User</span>!</h1>
+            </div>
+            <div id="accessDeniedMessage" class="access-denied-message" aria-live="polite">
+                <p>You do not have access to this page!</p>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var contextPath = /*[[@{/}]]*/ '';
+        /*]]>*/
+    </script>
+    <script th:src="@{/js/home.js}"></script>
 </body>
 </html>
