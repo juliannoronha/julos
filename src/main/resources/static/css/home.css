@@ -142,3 +142,204 @@ nav ul li a i {
 .logout button i {
     margin-right: 8px;
 }
+
+/* =================================================================
+ * Responsive Navigation & Header Styles
+ * ================================================================= */
+
+/* Main Content Area */
+.main-content {
+    margin-left: var(--navbar-width);
+    flex: 1;
+    transition: margin-left 0.3s ease;
+    min-height: 100vh;
+}
+
+/* Header Section */
+.header {
+    height: var(--header-height);
+    background-color: var(--secondary-bg);
+    padding: 0 var(--content-padding);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Profile Section */
+.profile-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.profile-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.profile-role {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Header Actions */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.action-button {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.action-button:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Mobile Navigation Toggle */
+.nav-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+/* Collapsed Navigation State */
+.nav-collapsed {
+    width: var(--navbar-collapsed-width);
+}
+
+.nav-collapsed .logo img {
+    max-width: 40px;
+}
+
+.nav-collapsed .nav-text,
+.nav-collapsed .panel > span,
+.nav-collapsed .admin-panel > span {
+    display: none;
+}
+
+.nav-collapsed + .main-content {
+    margin-left: var(--navbar-collapsed-width);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease forwards;
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease forwards;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1024px) {
+    :root {
+        --navbar-width: 220px;
+    }
+    
+    .profile-info {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-toggle {
+        display: block;
+    }
+    
+    nav {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    nav.active {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .header-actions {
+        gap: 0.5rem;
+    }
+    
+    .action-button {
+        width: 35px;
+        height: 35px;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --content-padding: 10px;
+    }
+    
+    .header {
+        padding: 0 0.5rem;
+    }
+    
+    .action-button {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+/* Overlay for Mobile Navigation */
+.nav-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+@media (max-width: 768px) {
+    .nav-overlay.active {
+        display: block;
+    }
+}
