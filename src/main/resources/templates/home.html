@@ -47,11 +47,6 @@
                     </div>
                 </li>
             </ul>
-            <div class="logout">
-                <form th:action="@{/logout}" method="post" onsubmit="return fadeOutAndSubmit(this, event)">
-                    <button type="submit" class="button"><i class="fas fa-sign-out-alt"></i> Logout</button>
-                </form>
-            </div>
         </div>
     </nav>
 
@@ -81,6 +76,24 @@
                     </button>
                 </div>
 
+                <!-- Notification Panel -->
+                <div id="notificationPanel" class="nav-panel" style="display: none;">
+                    <div class="notification-header">
+                        <div class="notification-title">
+                            <p>Notifications</p>
+                            <button type="button" class="new-notifications-badge">New</button>
+                        </div>
+                        <button type="button" class="close-button" onclick="handleNavClick('notification')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-list" th:if="${notifications!= null}">
+                            <!-- This will be populated dynamically via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Profile Section -->
                 <div class="profile-button" onclick="handleNavClick('userProfile')">
                     <img th:src="@{/images/avatar.jpg}" alt="user-profile" class="profile-avatar"/>
@@ -90,31 +103,45 @@
                     </div>
                     <i class="fas fa-chevron-down"></i>
                 </div>
+
+                <!-- User Profile Panel -->
+                <div id="userProfilePanel" class="nav-panel" style="display: none;">
+                    <div class="profile-header">
+                        <div class="welcome-message">
+                            <p class="greeting-text">
+                                <span class="user-greeting" th:text="${#authentication.name}">Admin</span>
+                            </p>
+                        </div>
+                        <button type="button" class="close-button" onclick="handleNavClick('userProfile')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="profile-actions">
+                        <div class="profile-action-item" onclick="handleProfileAction('settings')">
+                            <button type="button" class="action-icon">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            <div class="action-details">
+                                <p class="action-title">Account Settings</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-footer">
+                        <form th:action="@{/logout}" method="post" onsubmit="return fadeOutAndSubmit(this, event)">
+                            <button type="submit" class="logout-button">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Dropdown Panels -->
         <div id="chatPanel" class="nav-panel" style="display: none;">
             <!-- Chat content -->
-        </div>
-        <div id="notificationPanel" class="nav-panel" style="display: none;">
-            <div class="notification-header">
-                <div class="notification-title">
-                    <p>Notifications</p>
-                    <button type="button" class="new-notifications-badge">New</button>
-                </div>
-                <button type="button" class="close-button" onclick="handleNavClick('notification')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="notification-content">
-                <div class="notification-list" th:if="${notifications !=null}">
-                    <!-- This will be populated dynamically via JavaScript -->
-                </div>
-            </div>
-        </div>
-        <div id="userProfilePanel" class="nav-panel" style="display: none;">
-            <!-- User profile content -->
         </div>
     </div>
 

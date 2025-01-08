@@ -117,15 +117,6 @@ nav ul li a i {
     transition: opacity var(--transition-speed) ease;
 }
 
-.flash-red {
-    animation: flashRed 1.5s ease;
-}
-
-@keyframes flashRed {
-    0%, 100% { background-color: transparent; }
-    50% { background-color: rgba(255, 0, 0, 0.2); }
-}
-
 /* =================================================================
  * Responsive Design
  * ================================================================= */
@@ -191,22 +182,6 @@ nav ul li a i {
 .profile-role {
     font-size: 0.8rem;
     color: var(--text-secondary);
-}
-
-/* Notification Indicators */
-.notification-dot {
-    position: relative;
-}
-
-.notification-dot::after {
-    content: '';
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 8px;
-    height: 8px;
-    background-color: #ff4444;
-    border-radius: 50%;
 }
 
 /* Panel Styling */
@@ -292,55 +267,6 @@ nav.collapsed .panel > span,
 nav.collapsed .admin-panel > span {
     text-align: center;
     padding: 0.5rem;
-}
-
-/* Logout Button */
-.logout {
-    margin-top: auto;
-    width: calc(100% - 2rem);
-    padding: 1rem;
-    background-color: var(--secondary-bg);
-    border-top: 1px solid var(--border-color);
-}
-
-.logout form {
-    margin: 0;
-}
-
-.logout button {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    padding: 0.75rem 1rem;
-    color: var(--text-primary);
-    text-decoration: none;
-    border-radius: 4px;
-    transition: background-color var(--transition-speed);
-    background-color: var(--primary-bg);
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: inherit;
-}
-
-.logout button:hover {
-    background-color: var(--hover-bg);
-}
-
-.logout button i {
-    margin-right: 12px;
-    font-size: 1.1rem;
-}
-
-/* Update collapsed state for logout */
-nav.collapsed .logout {
-    width: calc(var(--sidebar-collapsed-width) - 2rem);
-    margin-left: 1rem;
-    margin-right: 1rem;
-}
-
-nav.collapsed .logout button span {
-    display: none;
 }
 
 /* TODO: Access Denied Fix
@@ -490,8 +416,8 @@ nav.collapsed .logout button span {
 /* Navigation Panels */
 .nav-panel {
     position: absolute;
-    top: 100%;
-    right: 1rem;
+    top: calc(100% + 0.5rem);
+    right: 0;
     min-width: 300px;
     background-color: var(--secondary-bg);
     border: 1px solid var(--border-color);
@@ -611,4 +537,136 @@ nav.collapsed + .navbar-container {
 
 .see-all-button:hover {
     background-color: var(--hover-bg);
+}
+
+/* User Profile Panel Styles */
+#userProfilePanel {
+    min-width: 360px;
+    padding: 1.5rem;
+}
+
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.profile-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+} 
+
+.profile-action-item {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+}
+
+.profile-action-item:hover {
+    background-color: var(--hover-bg);
+    border-radius: 0.55rem;
+}
+
+.action-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: #ffffff;
+    background: transparent;
+}
+
+.action-details {
+    flex: 1;
+}
+
+.action-title {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.profile-footer {
+    margin-top: 1.5rem;
+}
+
+.logout-button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--secondary-bg);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.logout-button:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Welcome Message Animation */
+.welcome-message {
+    flex: 1;
+    text-align: center;
+    overflow: hidden;
+}
+
+.greeting-text {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    animation: slideIn 0.5s ease-out;
+    margin: 0;
+}
+
+.user-greeting {
+    color: #03C9D7;
+}
+
+@keyframes slideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Add animation out when closing */
+#userProfilePanel.closing .greeting-text {
+    animation: slideOut 0.3s ease-in;
+}
+
+@keyframes slideOut {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
 }

@@ -448,11 +448,16 @@ function handleNavClick(panel) {
         if (element) {
             if (p === panel) {
                 const isOpening = element.style.display === 'none';
-                element.style.display = isOpening ? 'block' : 'none';
-                
-                // Initialize notifications when opening the panel
-                if (isOpening && p === 'notification') {
-                    initializeNotifications();
+                if (isOpening) {
+                    element.classList.remove('closing');
+                    element.style.display = 'block';
+                } else {
+                    element.classList.add('closing');
+                    // Wait for animation to complete before hiding
+                    setTimeout(() => {
+                        element.style.display = 'none';
+                        element.classList.remove('closing');
+                    }, 300); // Match animation duration
                 }
             } else {
                 element.style.display = 'none';
@@ -468,7 +473,9 @@ function handleActiveMenu() {
 
 // Close panels when clicking outside
 document.addEventListener('click', (event) => {
-    if (!event.target.closest('.nav-button') && !event.target.closest('.nav-panel')) {
+    if (!event.target.closest('.nav-button') && 
+        !event.target.closest('.nav-panel') && 
+        !event.target.closest('.profile-button')) {
         document.querySelectorAll('.nav-panel').forEach(panel => {
             panel.style.display = 'none';
         });
@@ -588,4 +595,14 @@ function setupNotificationSocket() {
 document.addEventListener('DOMContentLoaded', function() {
     initializeNotifications();
 });
+
+/**
+ * Handle profile action clicks
+ * @param {string} action - The action type ('settings')
+ */
+function handleProfileAction(action) {
+    if (action === 'settings') {
+        window.location.href = '/settings';
+    }
+}
 
