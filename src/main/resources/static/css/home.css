@@ -1,64 +1,57 @@
-/* =================================================================
- * Home Page Styles
- * Purpose: Defines styles for the main dashboard and navigation
- * Dependencies: Font Awesome, Montserrat font
- * ================================================================= */
-
-/* -----------------------------------------------------------------
- * Animations
- * @note: Defines core entrance animations for UI elements
- * ----------------------------------------------------------------- */
-
-@keyframes slideInFade {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-@keyframes fadeInFromTop {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+:root {
+    --primary-bg: #1a1a1a;
+    --secondary-bg: #2a2a2a;
+    --panel-bg: #333333;
+    --hover-bg: #444444;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --accent-color: #4a90e2;
+    --danger-color: #e74c3c;
+    --success-color: #2ecc71;
+    --transition-speed: 0.2s;
 }
 
-/* Animation timing assignments for navigation elements
- * @note: Staged entrance creates a cascading effect */
-nav, nav .logo, nav ul li, nav .logout, .main-top {
-    opacity: 0;
-    animation: slideInFade 0.5s ease-out forwards;
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--primary-bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
 }
 
-/* Cascading animation delays for nav elements
- * @performance: Consider reducing delays for faster initial load */
-nav .logo { animation-delay: 0.2s; }
-nav ul li:nth-child(1) { animation-delay: 0.4s; }
-nav ul li:nth-child(2) { animation-delay: 0.6s; }
-nav ul li:nth-child(3) { animation-delay: 0.8s; }
-nav .logout { animation-delay: 1s; }
-
-/* -----------------------------------------------------------------
- * Navigation Layout
- * @purpose: Core navigation structure and spacing
- * ----------------------------------------------------------------- */
-
+/* Navigation Layout */
 nav {
     position: fixed;
     left: 0;
     top: 0;
     height: 100vh;
     width: 250px;
-    background-color: #2a2a2a;
+    background-color: var(--secondary-bg);
     padding: 1rem;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    transition: transform var(--transition-speed) ease;
 }
 
 .navbar {
     display: flex;
     flex-direction: column;
     height: 100%;
+    gap: 1rem;
 }
 
+/* Logo Section */
 .logo {
     padding: 1rem;
-    margin-bottom: 2rem;
+    text-align: center;
+    border-bottom: 1px solid var(--panel-bg);
 }
 
 .logo img {
@@ -66,18 +59,12 @@ nav {
     height: auto;
 }
 
-nav ul {
-    flex-grow: 1;
-    overflow-y: auto;
-}
-
-/* Panel styling updates */
+/* Navigation Panels */
 .panel, .admin-panel {
-    margin-bottom: 1.5rem;
-    background-color: #333333;
+    background-color: var(--panel-bg);
     border-radius: 8px;
     overflow: hidden;
-    transition: transform 0.2s ease;
+    transition: transform var(--transition-speed) ease;
 }
 
 .panel:hover, .admin-panel:hover {
@@ -85,22 +72,41 @@ nav ul {
 }
 
 .panel > span, .admin-panel > span {
-    background-color: #444444;
+    display: block;
+    padding: 0.75rem 1rem;
+    background-color: var(--hover-bg);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.panel ul, .admin-panel ul {
+    list-style: none;
 }
 
 .panel ul li a, .admin-panel ul li a {
     display: flex;
     align-items: center;
-    color: #ffffff;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
     text-decoration: none;
-    transition: background-color 0.2s ease;
+    transition: background-color var(--transition-speed) ease;
+    gap: 0.5rem;
 }
 
 .panel ul li a:hover, .admin-panel ul li a:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--hover-bg);
 }
 
-/* Logout section */
+/* Icons */
+.nav-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Logout Section */
 .logout {
     margin-top: auto;
     padding: 1rem;
@@ -109,8 +115,8 @@ nav ul {
 .logout button {
     width: 100%;
     padding: 0.8rem;
-    background-color: #444444;
-    color: #ffffff;
+    background-color: var(--panel-bg);
+    color: var(--text-primary);
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -118,24 +124,35 @@ nav ul {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    transition: background-color 0.2s ease;
+    transition: background-color var(--transition-speed) ease;
+    font-size: 1rem;
 }
 
 .logout button:hover {
-    background-color: #555555;
+    background-color: var(--danger-color);
 }
 
-/* Main content adjustment */
+/* Main Content Area */
 .main {
-    margin-left: 250px; /* Match nav width */
+    margin-left: 250px;
     padding: 2rem;
+    min-height: 100vh;
 }
 
-/* Mobile responsiveness */
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* Mobile Responsiveness */
 @media (max-width: 900px) {
     nav {
         transform: translateX(-100%);
-        transition: transform 0.3s ease;
     }
 
     nav.active {
@@ -151,147 +168,55 @@ nav ul {
         position: fixed;
         top: 1rem;
         left: 1rem;
-        z-index: 1000;
-        background: #2a2a2a;
+        z-index: 1001;
+        background: var(--secondary-bg);
         border: none;
-        color: white;
-        padding: 0.5rem;
-        border-radius: 4px;
+        color: var(--text-primary);
+        padding: 0.75rem;
+        border-radius: 8px;
         cursor: pointer;
+        transition: background-color var(--transition-speed) ease;
+    }
+
+    .mobile-menu-toggle:hover {
+        background-color: var(--hover-bg);
     }
 }
 
-/* -----------------------------------------------------------------
- * Panel Components
- * @purpose: Styles for admin and general panels
- * @note: Shared between admin and regular panels for consistency
- * ----------------------------------------------------------------- */
-
-.panel, .admin-panel {
-    width: 100%;
-    text-align: left;
-}
-
-/* Panel headers */
-.panel > span, .admin-panel > span {
-    display: block;
-    padding: 10px 1.5rem;
-    color: #ffffff;
-    font-weight: bold;
-    font-size: 1em;
-    margin-bottom: 10px;
-}
-
-/* Panel navigation lists
- * @accessibility: Removes default list styling for cleaner navigation */
-.panel ul, .admin-panel ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-.panel ul li, .admin-panel ul li {
-    width: 100%;
-}
-
-/* Panel link styling
- * @note: Consistent padding for touch targets */
-.panel ul li a, .admin-panel ul li a {
-    padding: 1rem 1.5rem;
-}
-
-/* Icon styling within panels
- * @dependency: Requires Font Awesome */
-.panel ul li a i, .admin-panel ul li a i {
-    width: 24px;
-    font-size: 18px;
-    margin-right: 10px;
-    flex-shrink: 0;
-}
-
-/* -----------------------------------------------------------------
- * Main Content Layout
- * @purpose: Primary content structure and dashboard
- * ----------------------------------------------------------------- */
-
-.main {
-    display: flex;
-    justify-content: space-between;
-    padding: 20px;
-}
-
-.content-wrapper {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Dashboard Card
- * @note: Fixed positioning with animation entrance
- * @performance: Uses GPU acceleration for animations */
-.dashboard {
-    position: fixed;
-    background-color: #2a2a2a;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    width: 300px;
-    margin-left: 20px;
-    align-self: flex-start;
-    top: 20px;
-    opacity: 0;
-    animation: slideInFade 0.5s ease-out forwards;
-    animation-delay: 1.2s;
-}
-
-/* Dashboard Components
- * @purpose: Styles for dashboard elements and statistics display */
-.dashboard h3 {
-    margin-top: 0;
-    margin-bottom: 20px;
-    text-align: center;
-    color: #ffffff;
-}
-
-.dashboard-item {
-    margin-bottom: 15px;
-}
-
-.dashboard-item-label {
-    font-size: 0.9em;
-    color: #888;
-}
-
-.dashboard-item-value {
-    font-size: 1.2em;
-    color: #ffffff;
-    font-weight: 600;
-}
-
-/* -----------------------------------------------------------------
- * Utility Classes
- * @purpose: Helper styles for messages and charts
- * ----------------------------------------------------------------- */
-
-.welcome-message {
-    margin-bottom: 20px;
-}
-
-.welcome-message h1 {
-    color: #ffffff;
-}
-
-/* Error message styling
- * @accessibility: Uses semantic colors for error states */
-.access-denied-message {
-    color: #ff6b6b;
+/* Utility Classes */
+.hidden {
     display: none;
 }
 
-/* Chart container
- * @dependency: Requires Chart.js
- * @note: Fixed height for consistent layout */
-.dashboard-chart {
-    margin-top: 20px;
-    height: 200px;
+.flex {
+    display: flex;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+/* Status Indicators */
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 0.5rem;
+}
+
+.status-dot.active {
+    background-color: var(--success-color);
+}
+
+.status-dot.warning {
+    background-color: #f1c40f;
+}
+
+.status-dot.error {
+    background-color: var(--danger-color);
 }
