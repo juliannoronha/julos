@@ -313,22 +313,31 @@ nav.collapsed .admin-panel > span {
     border-top: 1px solid var(--border-color);
 }
 
-.logout a {
+.logout form {
+    margin: 0;
+}
+
+.logout button {
     display: flex;
     align-items: center;
+    width: 100%;
     padding: 0.75rem 1rem;
     color: var(--text-primary);
     text-decoration: none;
     border-radius: 6px;
     transition: background-color var(--transition-speed);
     background-color: var(--primary-bg);
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
 }
 
-.logout a:hover {
+.logout button:hover {
     background-color: var(--hover-bg);
 }
 
-.logout i {
+.logout button i {
     margin-right: 12px;
     font-size: 1.1rem;
 }
@@ -338,6 +347,6 @@ nav.collapsed .logout {
     width: var(--sidebar-collapsed-width);
 }
 
-nav.collapsed .logout span {
+nav.collapsed .logout button span {
     display: none;
 }
