@@ -101,3 +101,202 @@ nav ul li a i {
     margin-right: 12px;
     font-size: 1.1rem;
 }
+
+/* =================================================================
+ * Animations & Transitions
+ * ================================================================= */
+
+.fade-out {
+    opacity: 0;
+    transition: opacity var(--transition-speed) ease;
+}
+
+.fade-in {
+    opacity: 1;
+    transition: opacity var(--transition-speed) ease;
+}
+
+.flash-red {
+    animation: flashRed 1.5s ease;
+}
+
+@keyframes flashRed {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: rgba(255, 0, 0, 0.2); }
+}
+
+/* =================================================================
+ * Responsive Design
+ * ================================================================= */
+
+/* Mobile Navigation */
+@media (max-width: 768px) {
+    nav {
+        width: var(--sidebar-collapsed-width);
+        transform: translateX(-100%);
+    }
+
+    nav.active {
+        transform: translateX(0);
+        width: var(--sidebar-width);
+    }
+
+    .nav-text {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity var(--transition-speed);
+    }
+
+    nav.active .nav-text {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+}
+
+/* =================================================================
+ * Component Styling
+ * ================================================================= */
+
+/* Profile Section */
+.profile-section {
+    padding: 1rem;
+    border-top: 1px solid var(--border-color);
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.profile-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.profile-role {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Notification Indicators */
+.notification-dot {
+    position: relative;
+}
+
+.notification-dot::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    background-color: #ff4444;
+    border-radius: 50%;
+}
+
+/* Panel Styling */
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.panel-content {
+    padding: 1rem;
+}
+
+/* Button Styling */
+.nav-button {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    transition: background-color var(--transition-speed);
+    cursor: pointer;
+}
+
+.nav-button:hover {
+    background-color: var(--hover-bg);
+}
+
+.nav-button i {
+    margin-right: 12px;
+}
+
+/* =================================================================
+ * Utility Classes
+ * ================================================================= */
+
+.hidden {
+    display: none !important;
+}
+
+.flex {
+    display: flex;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.text-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Main Content Area */
+.main-content {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    padding: 2rem;
+    transition: margin-left var(--transition-speed);
+}
+
+/* Collapsed Sidebar States */
+nav.collapsed {
+    width: var(--sidebar-collapsed-width);
+}
+
+nav.collapsed + .main-content {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+nav.collapsed .nav-text,
+nav.collapsed .profile-info {
+    display: none;
+}
+
+nav.collapsed .logo img {
+    margin: 0 auto;
+}
+
+nav.collapsed .panel > span,
+nav.collapsed .admin-panel > span {
+    text-align: center;
+    padding: 0.5rem;
+}
