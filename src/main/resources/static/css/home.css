@@ -274,28 +274,18 @@ nav ul li a i {
 .main {
     margin-left: var(--sidebar-width);
     min-height: 100vh;
+    padding: 2rem;
     display: flex;
-    align-items: center;
-    justify-content: center;
     transition: margin-left var(--transition-speed);
 }
 
 .content-wrapper {
     width: 100%;
-    max-width: 800px;
-    padding: 2rem;
-}
-
-/* Update for collapsed sidebar state */
-nav.collapsed + .main {
-    margin-left: var(--sidebar-collapsed-width);
-}
-
-/* Responsive adjustment */
-@media (max-width: 768px) {
-    .main {
-        margin-left: 0;
-    }
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 15vh; /* This pushes the content down from the top */
 }
 
 /* Collapsed Sidebar States */
@@ -303,7 +293,7 @@ nav.collapsed {
     width: var(--sidebar-collapsed-width);
 }
 
-nav.collapsed + .main-content {
+nav.collapsed + .main {
     margin-left: var(--sidebar-collapsed-width);
 }
 
@@ -502,5 +492,12 @@ nav.collapsed .logout button span {
     }
     100% {
         width: 100%;
+    }
+}
+
+/* Responsive adjustment */
+@media (max-width: 768px) {
+    .main {
+        margin-left: 0;
     }
 }
