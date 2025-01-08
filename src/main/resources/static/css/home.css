@@ -270,12 +270,32 @@ nav ul li a i {
     text-overflow: ellipsis;
 }
 
-/* Main Content Area */
-.main-content {
+/* Main Content Area - Updated */
+.main {
     margin-left: var(--sidebar-width);
-    flex: 1;
-    padding: 2rem;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: margin-left var(--transition-speed);
+}
+
+.content-wrapper {
+    width: 100%;
+    max-width: 800px;
+    padding: 2rem;
+}
+
+/* Update for collapsed sidebar state */
+nav.collapsed + .main {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+/* Responsive adjustment */
+@media (max-width: 768px) {
+    .main {
+        margin-left: 0;
+    }
 }
 
 /* Collapsed Sidebar States */
