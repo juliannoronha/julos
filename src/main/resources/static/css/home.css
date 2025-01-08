@@ -53,12 +53,9 @@ nav {
     margin-bottom: 1rem;
 }
 
-.logo a {
-    font-size: 1.75rem;
-    font-weight: bold;
-    color: var(--text-primary);
-    text-decoration: none;
-    letter-spacing: 0.1em;
+.logo img {
+    height: 40px;
+    width: auto;
 }
 
 /* Navigation Lists */
@@ -306,7 +303,7 @@ nav.collapsed .admin-panel > span {
 }
 
 /* Logout Button */
-.logout-button {
+.logout {
     position: fixed;
     bottom: 0;
     left: 0;
@@ -316,7 +313,7 @@ nav.collapsed .admin-panel > span {
     border-top: 1px solid var(--border-color);
 }
 
-.logout-button a {
+.logout a {
     display: flex;
     align-items: center;
     padding: 0.75rem 1rem;
@@ -327,20 +324,20 @@ nav.collapsed .admin-panel > span {
     background-color: var(--primary-bg);
 }
 
-.logout-button a:hover {
+.logout a:hover {
     background-color: var(--hover-bg);
 }
 
-.logout-button i {
+.logout i {
     margin-right: 12px;
     font-size: 1.1rem;
 }
 
 /* Update collapsed state for logout */
-nav.collapsed .logout-button {
+nav.collapsed .logout {
     width: var(--sidebar-collapsed-width);
 }
 
-nav.collapsed .logout-button span {
+nav.collapsed .logout span {
     display: none;
 }
