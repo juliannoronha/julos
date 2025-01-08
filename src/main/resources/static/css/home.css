@@ -501,3 +501,135 @@ nav.collapsed .logout button span {
         margin-left: 0;
     }
 }
+
+/* =================================================================
+ * Navbar Styling
+ * ================================================================= */
+
+.navbar-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: var(--sidebar-width);
+    height: var(--header-height);
+    background-color: var(--secondary-bg);
+    border-bottom: 1px solid var(--border-color);
+    transition: left var(--transition-speed);
+    z-index: 900;
+}
+
+.navbar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem;
+    height: 100%;
+}
+
+/* Navigation Buttons */
+.nav-items {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-button {
+    position: relative;
+}
+
+.nav-button button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+}
+
+.nav-button button:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Notification Dots */
+.notification-dot::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: attr(data-dot-color);
+}
+
+/* Profile Section */
+.profile-button {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+}
+
+.profile-button:hover {
+    background-color: var(--hover-bg);
+}
+
+.profile-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-info {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.greeting {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.username {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+/* Navigation Panels */
+.nav-panel {
+    position: absolute;
+    top: 100%;
+    right: 1rem;
+    min-width: 300px;
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .navbar-container {
+        left: 0;
+    }
+
+    .profile-info {
+        display: none;
+    }
+}
+
+/* Collapsed Sidebar State */
+nav.collapsed + .navbar-container {
+    left: var(--sidebar-collapsed-width);
+}
