@@ -441,3 +441,31 @@ function flashButton(button) {
 // Initial data fetch
 // document.addEventListener('DOMContentLoaded', fetchOverallProductivity);
 
+function handleNavClick(panel) {
+    const panels = ['chat', 'notification', 'userProfile'];
+    panels.forEach(p => {
+        const element = document.getElementById(`${p}Panel`);
+        if (element) {
+            if (p === panel) {
+                element.style.display = element.style.display === 'none' ? 'block' : 'none';
+            } else {
+                element.style.display = 'none';
+            }
+        }
+    });
+}
+
+function handleActiveMenu() {
+    const nav = document.getElementById('mainNav');
+    nav.classList.toggle('collapsed');
+}
+
+// Close panels when clicking outside
+document.addEventListener('click', (event) => {
+    if (!event.target.closest('.nav-button') && !event.target.closest('.nav-panel')) {
+        document.querySelectorAll('.nav-panel').forEach(panel => {
+            panel.style.display = 'none';
+        });
+    }
+});
+
