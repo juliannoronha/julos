@@ -163,12 +163,6 @@ nav ul li a i {
     gap: 1rem;
 }
 
-.profile-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    overflow: hidden;
-}
 
 .profile-info {
     flex: 1;
@@ -246,6 +240,31 @@ nav ul li a i {
 }
 
 /* Collapsed Sidebar States */
+
+nav.collapsed #wellcaButton,
+nav.collapsed #nbaButton {
+    font-size: 0; /* Hide all text */
+}
+
+/* Restore icon size */
+nav.collapsed #wellcaButton i,
+nav.collapsed #nbaButton i {
+    font-size: 1.1rem;
+}
+
+/* Ensure text content is hidden */
+nav.collapsed #wellcaButton > *:not(i),
+nav.collapsed #nbaButton > *:not(i) {
+    display: none;
+}
+
+/* Additional specificity for text nodes */
+nav.collapsed #wellcaButton::after,
+nav.collapsed #nbaButton::after {
+    display: none;
+}
+
+
 nav.collapsed {
     width: var(--sidebar-collapsed-width);
 }
@@ -254,19 +273,55 @@ nav.collapsed + .main {
     margin-left: var(--sidebar-collapsed-width);
 }
 
+/* Hide text in collapsed state for specific panels */
+nav.collapsed .admin-panel a {
+    font-size: 0; /* This will hide the text */
+}
+
+nav.collapsed .admin-panel a i {
+    font-size: 1.1rem; /* Restore the icon size */
+}
+
+/* Or alternatively, we can target the text specifically */
+nav.collapsed .admin-panel a > span,
+nav.collapsed .admin-panel a::after {
+    display: none;
+}
+
+/* Update panel visibility in collapsed state */
+nav.collapsed .panel > span,
+nav.collapsed .admin-panel > span,
+nav.collapsed .central-fill-panel > span,
+nav.collapsed .sports-panel > span {
+    display: none;
+}
+
 nav.collapsed .nav-text,
 nav.collapsed .profile-info {
     display: none;
 }
 
-nav.collapsed .logo img {
-    margin: 0 auto;
+nav.collapsed .panel,
+nav.collapsed .admin-panel,
+nav.collapsed .central-fill-panel,
+nav.collapsed .sports-panel {
+    background-color: transparent;
+    margin: 0.5rem;
+    padding: 0;
 }
 
-nav.collapsed .panel > span,
-nav.collapsed .admin-panel > span {
-    text-align: center;
-    padding: 0.5rem;
+nav.collapsed .logo img {
+    display: none;
+}
+
+/* Adjust icon positioning in collapsed state */
+nav.collapsed ul li a {
+    justify-content: center;
+    padding: 0.75rem;
+}
+
+nav.collapsed ul li a i {
+    margin-right: 0;
 }
 
 /* TODO: Access Denied Fix

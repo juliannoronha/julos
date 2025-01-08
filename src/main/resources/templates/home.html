@@ -96,7 +96,6 @@
 
                 <!-- Profile Section -->
                 <div class="profile-button" onclick="handleNavClick('userProfile')">
-                    <img th:src="@{/images/avatar.jpg}" alt="user-profile" class="profile-avatar"/>
                     <div class="profile-info">
                         <span class="greeting">Hi,</span>
                         <span class="username" th:text="${#authentication.name}">User</span>
