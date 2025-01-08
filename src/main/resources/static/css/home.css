@@ -305,8 +305,6 @@ nav.collapsed .admin-panel > span {
 /* Logout Button */
 .logout {
     margin-top: auto;
-    margin-left: 1rem;
-    margin-right: 1rem;
     width: calc(100% - 2rem);
     padding: 1rem;
     background-color: var(--secondary-bg);
