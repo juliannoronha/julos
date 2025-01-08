@@ -311,7 +311,8 @@ nav.collapsed .sports-panel {
 }
 
 nav.collapsed .logo img {
-    display: none;
+    height: 35px;
+    width: auto;
 }
 
 /* Adjust icon positioning in collapsed state */
