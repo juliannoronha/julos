@@ -308,14 +308,32 @@ public class WellcaController {
     @GetMapping("/monthly-chart-stats/{yearMonth}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<Map<String, Object>> getMonthlyChartStats(
-            @PathVariable @DateTimeFormat(pattern = "yyyy-MM") LocalDate yearMonth) {
+            @PathVariable String yearMonth) {
         try {
             logger.debug("Fetching monthly chart stats for: {}", yearMonth);
-            Map<String, Object> chartData = wellcaService.getMonthlyChartStats(yearMonth);
+            
+            // Parse yearMonth string (format: "yyyy-MM")
+            String[] parts = yearMonth.split("-");
+            if (parts.length != 2) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Invalid date format. Use yyyy-MM"));
+            }
+            
+            int year = Integer.parseInt(parts[0]);
+            int month = Integer.parseInt(parts[1]);
+            
+            // Create start and end dates for the month
+            LocalDate startDate = LocalDate.of(year, month, 1);
+            LocalDate endDate = startDate.withDayOfMonth(
+                startDate.lengthOfMonth());
+            
+            Map<String, Object> chartData = wellcaService.getMonthlyChartStats(startDate, endDate);
             return ResponseEntity.ok(chartData);
+            
         } catch (Exception e) {
             logger.error("Error fetching monthly chart stats: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.internalServerError()
+                .body(Map.of("error", "Failed to generate monthly report"));
         }
     }
 

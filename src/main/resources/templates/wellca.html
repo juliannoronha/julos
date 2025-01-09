@@ -8,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/css/wellca.css}">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div sec:authorize="hasAnyRole('CHECKER', 'ADMIN', 'MODERATOR')">
@@ -196,6 +197,11 @@
                                     <button type="button" class="button generate-button" onclick="generateReport()">
                                         Generate Report
                                     </button>
+                                </div>
+
+                                <!-- Add this after the date-range-selector div and before the report-content div -->
+                                <div class="chart-container">
+                                    <canvas id="reportChart"></canvas>
                                 </div>
 
                                 <!-- Report Content Sections -->

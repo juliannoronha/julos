@@ -2,6 +2,8 @@ package com.demoproject.demo.services;
 
 import com.demoproject.demo.entity.Wellca;
 import com.demoproject.demo.repository.WellcaRepository;
+
+import org.hibernate.annotations.BatchSize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
@@ -10,8 +12,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Page;
+import org.springframework.scheduling.annotation.Async;
 import java.util.concurrent.CompletableFuture;
 
 import java.math.BigDecimal;
@@ -238,17 +239,15 @@ public class WellcaService {
 
     /**
      * Get monthly statistics for chart display
-     * @param yearMonth The month to get statistics for
+     * @param startDate Start of the period
+     * @param endDate End of the period
      * @return Map containing chart data and statistics
      */
     @Transactional(readOnly = true)
     @BatchSize(size = 100)
-    @Cacheable(value = "monthlyChartData", key = "'monthly-' + #yearMonth")
-    public Map<String, Object> getMonthlyChartStats(LocalDate yearMonth) {
-        LocalDate startDate = yearMonth.withDayOfMonth(1);
-        LocalDate endDate = yearMonth.withDayOfMonth(yearMonth.lengthOfMonth());
-        
-        logger.debug("Fetching monthly chart stats for period {} to {}", startDate, endDate);
+    @Cacheable(value = "monthlyChartData", key = "'monthly-' + #startDate + '-' + #endDate")
+    public Map<String, Object> getMonthlyChartStats(LocalDate startDate, LocalDate endDate) {
+        logger.debug("Generating monthly chart stats from {} to {}", startDate, endDate);
         
         List<Map<String, Object>> monthlyStats = wellcaRepository.getMonthlyChartStats(startDate, endDate);
         
@@ -259,13 +258,21 @@ public class WellcaService {
         List<Number> rxPerDelivery = new ArrayList<>();
         List<Number> servicesCounts = new ArrayList<>();
         
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
+        
         monthlyStats.forEach(stat -> {
             LocalDate date = (LocalDate) stat.get("date");
-            labels.add(date.format(DateTimeFormatter.ofPattern("MMM dd")));
+            labels.add(date.format(formatter));
             
-            Long totalRx = (Long) stat.get("totalRx");
-            Long totalDeliveries = (Long) stat.get("totalDeliveries");
-            Long totalServices = (Long) stat.get("totalServices");
+            // Using camelCase to match repository naming
+            Long totalRx = ((Number) stat.get("newRx")).longValue() + 
+                          ((Number) stat.get("refill")).longValue() + 
+                          ((Number) stat.get("reAuth")).longValue();
+            Long totalDeliveries = ((Number) stat.get("purolator")).longValue() + 
+                                 ((Number) stat.get("fedex")).longValue() + 
+                                 ((Number) stat.get("oneCourier")).longValue() + 
+                                 ((Number) stat.get("goBolt")).longValue();
+            Long totalServices = ((Number) stat.get("serviceCount")).longValue();
             
             rxCounts.add(totalRx);
             deliveryCounts.add(totalDeliveries);
@@ -283,13 +290,14 @@ public class WellcaService {
             "services", servicesCounts
         ));
         
-        logger.debug("Generated chart data with {} data points", labels.size());
         return chartData;
     }
 
     @Async
     public CompletableFuture<Map<String, Object>> getMonthlyChartStatsAsync(LocalDate yearMonth) {
-        return CompletableFuture.completedFuture(getMonthlyChartStats(yearMonth));
+        LocalDate startDate = yearMonth.withDayOfMonth(1);
+        LocalDate endDate = yearMonth.withDayOfMonth(yearMonth.lengthOfMonth());
+        return CompletableFuture.completedFuture(getMonthlyChartStats(startDate, endDate));
     }
 
     /**

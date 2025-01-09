@@ -1303,3 +1303,42 @@ body:has(.tab-button[data-tab="reports"].active) .date-selector {
     padding: 0; /* Remove padding */
     overflow: hidden; /* Prevent content from showing */
 }
+
+/* Chart Container Styles */
+.chart-container {
+    background-color: var(--container-bg);
+    position: relative;
+    height: 400px;
+    width: 100%;
+    margin: 20px 0;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Chart Canvas Styles */
+#reportChart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Chart Loading State */
+.chart-container.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* Chart Error State */
+.chart-container.error {
+    border: 1px solid #ff4444;
+}
+
+/* Chart Legend Styles */
+.chart-legend {
+    margin-top: 15px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}

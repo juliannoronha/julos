@@ -6,6 +6,7 @@
  * ============================================================================= */
 
 let messageContainer;
+let reportChart = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     setupDeliveryForm();
@@ -38,6 +39,16 @@ document.addEventListener('DOMContentLoaded', function() {
         messageContainer = document.createElement('div');
         messageContainer.className = 'message-container';
         document.body.appendChild(messageContainer);
+    }
+
+    // Initialize chart when reports tab is shown
+    const reportsTab = document.querySelector('[data-tab="reports"]');
+    if (reportsTab) {
+        reportsTab.addEventListener('click', function() {
+            if (!reportChart) {
+                initializeChart();
+            }
+        });
     }
 });
 
@@ -462,6 +473,43 @@ async function generateReport() {
 // Helper function to update the report display with the fetched data
 function updateReportDisplay(data) {
     try {
+        // Prepare chart data
+        const chartData = {
+            labels: [],
+            datasets: {
+                rxCount: [],
+                deliveries: [],
+                rxPerDelivery: [],
+                services: []
+            }
+        };
+
+        // Process data for chart
+        if (data.length > 0) {
+            data.forEach(entry => {
+                // Add date label
+                const date = new Date(entry.date);
+                chartData.labels.push(date.toLocaleDateString());
+                
+                // Calculate totals for each metric
+                const totalRx = (entry.newRx || 0) + (entry.refill || 0) + (entry.reAuth || 0);
+                const totalDeliveries = (entry.purolator || 0) + (entry.fedex || 0) + 
+                                      (entry.oneCourier || 0) + (entry.goBolt || 0);
+                const servicesCount = entry.serviceType ? 1 : 0;
+                
+                // Add data points
+                chartData.datasets.rxCount.push(totalRx);
+                chartData.datasets.deliveries.push(totalDeliveries);
+                chartData.datasets.rxPerDelivery.push(
+                    totalDeliveries > 0 ? totalRx / totalDeliveries : 0
+                );
+                chartData.datasets.services.push(servicesCount);
+            });
+        }
+
+        // Update the chart
+        updateChart(chartData);
+
         // Update Delivery Statistics
         if (data.length > 0) {
             let totalPurolator = 0, totalFedex = 0, totalOneCourier = 0, totalGoBolt = 0;
@@ -1061,4 +1109,75 @@ function renderServiceBreakdown(data) {
             });
         });
     }
+}
+
+function initializeChart() {
+    const ctx = document.getElementById('reportChart').getContext('2d');
+    reportChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: 'RX Count',
+                    borderColor: '#2196F3',
+                    data: []
+                },
+                {
+                    label: 'Deliveries',
+                    borderColor: '#4CAF50',
+                    data: []
+                },
+                {
+                    label: 'RX per Delivery',
+                    borderColor: '#FFC107',
+                    data: []
+                },
+                {
+                    label: 'Services',
+                    borderColor: '#9C27B0',
+                    data: []
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y.toFixed(2);
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updateChart(data) {
+    if (!reportChart) {
+        initializeChart();
+    }
+
+    reportChart.data.labels = data.labels;
+    reportChart.data.datasets[0].data = data.datasets.rxCount;
+    reportChart.data.datasets[1].data = data.datasets.deliveries;
+    reportChart.data.datasets[2].data = data.datasets.rxPerDelivery;
+    reportChart.data.datasets[3].data = data.datasets.services;
+    
+    reportChart.update();
 }
