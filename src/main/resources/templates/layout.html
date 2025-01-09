@@ -14,11 +14,33 @@
     <!-- Sidebar Fragment -->
     <nav th:fragment="sidebar" id="mainNav">
         <div class="navbar">
-            <!-- Copy your existing sidebar content from home.html -->
             <div class="logo">
                 <img th:src="@{/images/logo.png}" alt="Logo">
             </div>
-            <!-- ... rest of your sidebar content ... -->
+            <div class="menu">
+                <div class="menu-item">
+                    <a th:href="@{/}" class="menu-link">
+                        <i class="fas fa-home"></i>
+                        <span class="menu-text">Dashboard</span>
+                    </a>
+                </div>
+                
+                <div class="menu-item">
+                    <a th:href="@{/wellca}" class="menu-link">
+                        <i class="fas fa-pills"></i>
+                        <span class="menu-text">Well.ca</span>
+                    </a>
+                </div>
+
+                <!-- Add any other menu items you have in your original sidebar -->
+                
+                <div class="menu-item bottom-item">
+                    <a href="#" onclick="document.getElementById('logout-form').submit(); return false;" class="menu-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="menu-text">Logout</span>
+                    </a>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -38,12 +60,6 @@
                     </button>
                 </div>
 
-                <div class="nav-button" title="Notifications">
-                    <button type="button" onclick="handleNavClick('notification')" class="notification-dot" data-dot-color="#FEC90F">
-                        <i class="fas fa-bell"></i>
-                    </button>
-                </div>
-
                 <div class="profile-button" onclick="handleNavClick('userProfile')">
                     <img th:src="@{/images/avatar.jpg}" alt="user-profile" class="profile-avatar"/>
                     <div class="profile-info">
@@ -57,13 +73,10 @@
 
         <!-- Dropdown Panels -->
         <div id="chatPanel" class="nav-panel" style="display: none;">
-            <!-- Chat content -->
-        </div>
-        <div id="notificationPanel" class="nav-panel" style="display: none;">
-            <!-- Notification content -->
+            <!-- Chat panel content -->
         </div>
         <div id="userProfilePanel" class="nav-panel" style="display: none;">
-            <!-- User profile content -->
+            <!-- User profile panel content -->
         </div>
     </div>
 </body>
