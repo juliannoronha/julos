@@ -490,16 +490,31 @@ function updateReportDisplay(data) {
 
         // Process data for chart
         if (data.length > 0) {
+            // Create a map to store service counts by date
+            const serviceCountsByDate = new Map();
+            
+            // First pass: Count services for each date
+            data.forEach(entry => {
+                if (entry.serviceType) {
+                    const dateKey = new Date(entry.date + 'T12:00:00').toLocaleDateString();
+                    serviceCountsByDate.set(dateKey, (serviceCountsByDate.get(dateKey) || 0) + 1);
+                }
+            });
+
+            // Second pass: Process all data for chart
             data.forEach(entry => {
                 // Add date label with consistent timezone handling
                 const date = new Date(entry.date + 'T12:00:00');
-                chartData.labels.push(date.toLocaleDateString());
+                const dateKey = date.toLocaleDateString();
+                chartData.labels.push(dateKey);
                 
                 // Calculate totals for each metric
                 const totalRx = (entry.newRx || 0) + (entry.refill || 0) + (entry.reAuth || 0);
                 const totalDeliveries = (entry.purolator || 0) + (entry.fedex || 0) + 
                                       (entry.oneCourier || 0) + (entry.goBolt || 0);
-                const servicesCount = entry.serviceType ? 1 : 0;
+                
+                // Get actual service count for this date
+                const servicesCount = serviceCountsByDate.get(dateKey) || 0;
                 
                 // Add data points
                 chartData.datasets.rxCount.push(totalRx);
@@ -1142,7 +1157,7 @@ function initializeChart() {
                     data: []
                 },
                 {
-                    label: 'Services',
+                    label: 'Services Count',
                     borderColor: '#9C27B0',
                     data: []
                 }
@@ -1153,7 +1168,10 @@ function initializeChart() {
             maintainAspectRatio: false,
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
                 }
             },
             plugins: {
@@ -1165,7 +1183,11 @@ function initializeChart() {
                                 label += ': ';
                             }
                             if (context.parsed.y !== null) {
-                                label += context.parsed.y.toFixed(2);
+                                if (label.includes('Services')) {
+                                    label += Math.round(context.parsed.y);
+                                } else {
+                                    label += context.parsed.y.toFixed(2);
+                                }
                             }
                             return label;
                         }
