@@ -11,7 +11,7 @@
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
-<body>
+<body th:data-user-role="${#authentication.authorities[0]}">
     <div sec:authorize="hasAnyRole('CHECKER', 'ADMIN', 'MODERATOR')">
         <!-- Sidebar -->
         <nav id="mainNav">
@@ -77,277 +77,276 @@
                 <!-- User profile panel content -->
             </div>
         </div>
+    </div>
 
-        <!-- Main Content -->
-        <div class="main">
-            <div class="content-wrapper">
-                <div class="form-container">
-                    <div class="container">
-                        <h2>Well.ca Management System</h2>
-                        
-                        <!-- Tab Navigation -->
-                        <div class="tab-navigation">
-                            <button class="tab-button active" data-tab="delivery">Delivery Tracking</button>
-                            <button class="tab-button" data-tab="rx-sales">RX Sales</button>
-                            <button class="tab-button" data-tab="services">Professional Services</button>
-                            <button class="tab-button" data-tab="reports">Reports</button>
+    <div class="main">
+        <div class="content-wrapper">
+            <div class="form-container">
+                <div class="container">
+                    <h2>Well.ca Management System</h2>
+                    
+                    <!-- Tab Navigation -->
+                    <div class="tab-navigation">
+                        <button class="tab-button active" data-tab="delivery">Delivery Tracking</button>
+                        <button class="tab-button" data-tab="rx-sales">RX Sales</button>
+                        <button class="tab-button" data-tab="services">Professional Services</button>
+                        <button class="tab-button" data-tab="reports">Reports</button>
+                    </div>
+
+                    <!-- Date Selection (Common to all tabs) -->
+                    <div class="date-selector">
+                        <label for="date">Select Date:</label>
+                        <input type="date" id="date" name="date" required>
+                    </div>
+
+                    <!-- Success/Error Messages -->
+                    <div th:if="${successMessage}" class="success-message" id="successMessage">
+                        <p th:text="${successMessage}"></p>
+                    </div>
+                    <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+                        <!-- Delivery Tracking Tab -->
+                        <div id="delivery" class="tab-pane active">
+                            <h3>Delivery Tracking</h3>
+                            <form id="deliveryForm" class="data-form">
+                                <div class="form-group">
+                                    <label for="purolator">Purolator:</label>
+                                    <input type="number" id="purolator" name="purolator" min="0" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="fedex">FedEx:</label>
+                                    <input type="number" id="fedex" name="fedex" min="0" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="oneCourier">1Courier:</label>
+                                    <input type="number" id="oneCourier" name="oneCourier" min="0" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="goBolt">GoBolt:</label>
+                                    <input type="number" id="goBolt" name="goBolt" min="0" value="0">
+                                </div>
+                                <div class="total-section">
+                                    <label>Total Deliveries:</label>
+                                    <span id="totalDeliveries">0</span>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="button submit-button">Save Delivery Data</button>
+                                    <button type="button" class="button clear-button">Clear</button>
+                                </div>
+                            </form>
                         </div>
 
-                        <!-- Date Selection (Common to all tabs) -->
-                        <div class="date-selector">
-                            <label for="date">Select Date:</label>
-                            <input type="date" id="date" name="date" required>
+                        <!-- RX Sales Tab -->
+                        <div id="rx-sales" class="tab-pane">
+                            <h3>RX Sales Summary</h3>
+                            <form id="rxSalesForm" class="data-form">
+                                <div class="form-group">
+                                    <label for="newRx">New RX:</label>
+                                    <input type="number" id="newRx" name="newRx" min="0" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="refill">Refill:</label>
+                                    <input type="number" id="refill" name="refill" min="0" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="reAuth">ReAuth:</label>
+                                    <input type="number" id="reAuth" name="reAuth" min="0" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="hold">Hold:</label>
+                                    <input type="number" id="hold" name="hold" min="0" value="0">
+                                </div>
+                                <div class="total-section">
+                                    <div class="total-group">
+                                        <label>Total Filled:</label>
+                                        <span id="totalFilled">0</span>
+                                        <small>(New RX + Refill + ReAuth)</small>
+                                    </div>
+                                    <div class="total-group">
+                                        <label>Total Entered:</label>
+                                        <span id="totalEntered">0</span>
+                                        <small>(Total Filled + Hold)</small>
+                                    </div>
+                                    <div class="total-group">
+                                        <label>Total/Hour:</label>
+                                        <span id="totalPerHour">0</span>
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="button submit-button">Save RX Data</button>
+                                    <button type="button" class="button clear-button">Clear</button>
+                                </div>
+                            </form>
                         </div>
 
-                        <!-- Success/Error Messages -->
-                        <div th:if="${successMessage}" class="success-message" id="successMessage">
-                            <p th:text="${successMessage}"></p>
+                        <!-- Professional Services Tab -->
+                        <div id="services" class="tab-pane">
+                            <h3>Professional Services</h3>
+                            <form id="servicesForm" class="data-form">
+                                <div class="form-group">
+                                    <label for="serviceType">Service Type:</label>
+                                    <select id="serviceType" name="serviceType" required>
+                                        <option value="">Select a service...</option>
+                                        <option value="FOLLOW_UP_MED_REVIEW">Follow Up Med Review</option>
+                                        <option value="OTHER_INJECTION_BILLED">Other Injection-Billed</option>
+                                        <option value="RENEWAL_CHARGED">Renewal Charged</option>
+                                        <option value="FOLLOW_UP_DIABETIC_MED_REVIEW">Follow-Up Diabetic Med Review</option>
+                                        <option value="MINOR_ALIGNMENT_VIRTUAL">Minor Alignment-Virtual</option>
+                                        <option value="ANNUAL_DIABETIC_MED_REVIEW">Annual Diabetic Med Review</option>
+                                        <option value="ANNUAL_MED_REVIEW">Annual Med Review</option>
+                                        <option value="DIABETIC_EDUCATION_REVIEW">Diabetic Education Review</option>
+                                        <option value="MINOR_ALIGNMENT_IN_PERSON">Minor Alignment In Person</option>
+                                    </select>
+                                </div>
+                                <!-- New Patient and Pharmacist Fields -->
+                                <div class="form-group">
+                                    <label for="patientName">Patient Name:</label>
+                                    <input type="text" id="patientName" name="patientName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="patientDob">Patient Date of Birth:</label>
+                                    <input type="date" id="patientDob" name="patientDob" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="pharmacistName">Pharmacist Name:</label>
+                                    <input type="text" id="pharmacistName" name="pharmacistName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="serviceCost">Service Cost ($):</label>
+                                    <div class="cost-input-group">
+                                        <span class="currency-symbol">$</span>
+                                        <input type="number" 
+                                               id="serviceCost" 
+                                               name="serviceCost" 
+                                               min="0" 
+                                               step="0.01" 
+                                               value="0.00"
+                                               required>
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="button submit-button">Add Service</button>
+                                    <button type="button" class="button clear-button">Clear</button>
+                                </div>
+                            </form>
                         </div>
-                        <div id="errorMessage" class="error-message" style="display: none;"></div>
 
-                        <!-- Tab Content -->
-                        <div class="tab-content">
-                            <!-- Delivery Tracking Tab -->
-                            <div id="delivery" class="tab-pane active">
-                                <h3>Delivery Tracking</h3>
-                                <form id="deliveryForm" class="data-form">
+                        <!-- Reports Tab -->
+                        <div id="reports" class="tab-pane">
+                            <h3>Reports</h3>
+                            <div class="reports-container">
+                                <!-- Date Range Selection -->
+                                <div class="date-range-selector">
                                     <div class="form-group">
-                                        <label for="purolator">Purolator:</label>
-                                        <input type="number" id="purolator" name="purolator" min="0" value="0">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="fedex">FedEx:</label>
-                                        <input type="number" id="fedex" name="fedex" min="0" value="0">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="oneCourier">1Courier:</label>
-                                        <input type="number" id="oneCourier" name="oneCourier" min="0" value="0">
+                                        <label for="startDate">Start Date:</label>
+                                        <input type="date" 
+                                               id="startDate" 
+                                               required 
+                                               pattern="\d{4}-\d{2}-\d{2}"
+                                               onchange="validateDateRange()" />
                                     </div>
                                     <div class="form-group">
-                                        <label for="goBolt">GoBolt:</label>
-                                        <input type="number" id="goBolt" name="goBolt" min="0" value="0">
+                                        <label for="endDate">End Date:</label>
+                                        <input type="date" 
+                                               id="endDate" 
+                                               required 
+                                               pattern="\d{4}-\d{2}-\d{2}"
+                                               onchange="validateDateRange()" />
                                     </div>
-                                    <div class="total-section">
-                                        <label>Total Deliveries:</label>
-                                        <span id="totalDeliveries">0</span>
-                                    </div>
-                                    <div class="form-actions">
-                                        <button type="submit" class="button submit-button">Save Delivery Data</button>
-                                        <button type="button" class="button clear-button">Clear</button>
-                                    </div>
-                                </form>
-                            </div>
+                                    <button type="button" class="button generate-button" onclick="generateReport()">
+                                        Generate Report
+                                    </button>
+                                </div>
 
-                            <!-- RX Sales Tab -->
-                            <div id="rx-sales" class="tab-pane">
-                                <h3>RX Sales Summary</h3>
-                                <form id="rxSalesForm" class="data-form">
-                                    <div class="form-group">
-                                        <label for="newRx">New RX:</label>
-                                        <input type="number" id="newRx" name="newRx" min="0" value="0">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="refill">Refill:</label>
-                                        <input type="number" id="refill" name="refill" min="0" value="0">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="reAuth">ReAuth:</label>
-                                        <input type="number" id="reAuth" name="reAuth" min="0" value="0">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="hold">Hold:</label>
-                                        <input type="number" id="hold" name="hold" min="0" value="0">
-                                    </div>
-                                    <div class="total-section">
-                                        <div class="total-group">
-                                            <label>Total Filled:</label>
-                                            <span id="totalFilled">0</span>
-                                            <small>(New RX + Refill + ReAuth)</small>
-                                        </div>
-                                        <div class="total-group">
-                                            <label>Total Entered:</label>
-                                            <span id="totalEntered">0</span>
-                                            <small>(Total Filled + Hold)</small>
-                                        </div>
-                                        <div class="total-group">
-                                            <label>Total/Hour:</label>
-                                            <span id="totalPerHour">0</span>
-                                        </div>
-                                    </div>
-                                    <div class="form-actions">
-                                        <button type="submit" class="button submit-button">Save RX Data</button>
-                                        <button type="button" class="button clear-button">Clear</button>
-                                    </div>
-                                </form>
-                            </div>
-
-                            <!-- Professional Services Tab -->
-                            <div id="services" class="tab-pane">
-                                <h3>Professional Services</h3>
-                                <form id="servicesForm" class="data-form">
-                                    <div class="form-group">
-                                        <label for="serviceType">Service Type:</label>
-                                        <select id="serviceType" name="serviceType" required>
-                                            <option value="">Select a service...</option>
-                                            <option value="FOLLOW_UP_MED_REVIEW">Follow Up Med Review</option>
-                                            <option value="OTHER_INJECTION_BILLED">Other Injection-Billed</option>
-                                            <option value="RENEWAL_CHARGED">Renewal Charged</option>
-                                            <option value="FOLLOW_UP_DIABETIC_MED_REVIEW">Follow-Up Diabetic Med Review</option>
-                                            <option value="MINOR_ALIGNMENT_VIRTUAL">Minor Alignment-Virtual</option>
-                                            <option value="ANNUAL_DIABETIC_MED_REVIEW">Annual Diabetic Med Review</option>
-                                            <option value="ANNUAL_MED_REVIEW">Annual Med Review</option>
-                                            <option value="DIABETIC_EDUCATION_REVIEW">Diabetic Education Review</option>
-                                            <option value="MINOR_ALIGNMENT_IN_PERSON">Minor Alignment In Person</option>
-                                        </select>
-                                    </div>
-                                    <!-- New Patient and Pharmacist Fields -->
-                                    <div class="form-group">
-                                        <label for="patientName">Patient Name:</label>
-                                        <input type="text" id="patientName" name="patientName" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="patientDob">Patient Date of Birth:</label>
-                                        <input type="date" id="patientDob" name="patientDob" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="pharmacistName">Pharmacist Name:</label>
-                                        <input type="text" id="pharmacistName" name="pharmacistName" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="serviceCost">Service Cost ($):</label>
-                                        <div class="cost-input-group">
-                                            <span class="currency-symbol">$</span>
-                                            <input type="number" 
-                                                   id="serviceCost" 
-                                                   name="serviceCost" 
-                                                   min="0" 
-                                                   step="0.01" 
-                                                   value="0.00"
-                                                   required>
-                                        </div>
-                                    </div>
-                                    <div class="form-actions">
-                                        <button type="submit" class="button submit-button">Add Service</button>
-                                        <button type="button" class="button clear-button">Clear</button>
-                                    </div>
-                                </form>
-                            </div>
-
-                            <!-- Reports Tab -->
-                            <div id="reports" class="tab-pane">
-                                <h3>Reports</h3>
-                                <div class="reports-container">
-                                    <!-- Date Range Selection -->
-                                    <div class="date-range-selector">
-                                        <div class="form-group">
-                                            <label for="startDate">Start Date:</label>
-                                            <input type="date" 
-                                                   id="startDate" 
-                                                   required 
-                                                   pattern="\d{4}-\d{2}-\d{2}"
-                                                   onchange="validateDateRange()" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="endDate">End Date:</label>
-                                            <input type="date" 
-                                                   id="endDate" 
-                                                   required 
-                                                   pattern="\d{4}-\d{2}-\d{2}"
-                                                   onchange="validateDateRange()" />
-                                        </div>
-                                        <button type="button" class="button generate-button" onclick="generateReport()">
-                                            Generate Report
-                                        </button>
-                                    </div>
-
-                                    <!-- Report Content Sections -->
-                                    <div class="report-content">
-                                        <!-- Delivery Statistics -->
-                                        <div class="report-section" id="deliveryStats">
-                                            <h4>Delivery Statistics</h4>
-                                            <div class="stats-grid">
-                                                <div class="stat-item">
-                                                    <label>Total Purolator:</label>
-                                                    <span id="totalPurolator">0</span>
-                                                </div>
-                                                <div class="stat-item">
-                                                    <label>Total FedEx:</label>
-                                                    <span id="totalFedex">0</span>
-                                                </div>
-                                                <div class="stat-item">
-                                                    <label>Total 1Courier:</label>
-                                                    <span id="totalOneCourier">0</span>
-                                                </div>
-                                                <div class="stat-item">
-                                                    <label>Total GoBolt:</label>
-                                                    <span id="totalGoBolt">0</span>
-                                                </div>
-                                                <div class="stat-item total">
-                                                    <label>Total Deliveries:</label>
-                                                    <span id="reportTotalDeliveries">0</span>
-                                                </div>
+                                <!-- Report Content Sections -->
+                                <div class="report-content">
+                                    <!-- Delivery Statistics -->
+                                    <div class="report-section" id="deliveryStats">
+                                        <h4>Delivery Statistics</h4>
+                                        <div class="stats-grid">
+                                            <div class="stat-item">
+                                                <label>Total Purolator:</label>
+                                                <span id="totalPurolator">0</span>
                                             </div>
-                                        </div>
-
-                                        <!-- RX Sales Statistics -->
-                                        <div class="report-section" id="rxStats">
-                                            <h4>RX Sales Summary</h4>
-                                            <div class="stats-grid">
-                                                <div class="stat-item">
-                                                    <label>Total New RX:</label>
-                                                    <span id="totalNewRx">0</span>
-                                                </div>
-                                                <div class="stat-item">
-                                                    <label>Total Refills:</label>
-                                                    <span id="totalRefills">0</span>
-                                                </div>
-                                                <div class="stat-item">
-                                                    <label>Total ReAuth:</label>
-                                                    <span id="totalReAuth">0</span>
-                                                </div>
-                                                <div class="stat-item">
-                                                    <label>Total Hold:</label>
-                                                    <span id="totalHold">0</span>
-                                                </div>
-                                                <div class="stat-item total">
-                                                    <label>Total Processed:</label>
-                                                    <span id="reportTotalProcessed">0</span>
-                                                </div>
+                                            <div class="stat-item">
+                                                <label>Total FedEx:</label>
+                                                <span id="totalFedex">0</span>
                                             </div>
-                                        </div>
-                                        <!-- Professional Services Summary -->
-                                        <div class="report-section" id="serviceStats">
-                                            <h4>Professional Services Summary</h4>
-                                            <div class="stats-grid">
-                                                <div class="stat-item">
-                                                    <label>Total Services Cost:</label>
-                                                    <span id="totalServices">0</span>
-                                                </div>
-                                                <div class="stat-item">
-                                                    <label>Service Breakdown:</label>
-                                                    <div id="serviceBreakdown" class="service-breakdown">
-                                                        <!-- Service rows will be dynamically added here -->
-                                                    </div>
-                                                </div>
+                                            <div class="stat-item">
+                                                <label>Total 1Courier:</label>
+                                                <span id="totalOneCourier">0</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <label>Total GoBolt:</label>
+                                                <span id="totalGoBolt">0</span>
+                                            </div>
+                                            <div class="stat-item total">
+                                                <label>Total Deliveries:</label>
+                                                <span id="reportTotalDeliveries">0</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- Export Options -->
-                                    <div class="export-options">
-                                        <button type="button" class="button export-button" onclick="exportToPDF()">
-                                            Export to PDF
-                                        </button>
-                                        <button type="button" class="button export-button" onclick="exportToExcel()">
-                                            Export to Excel
-                                        </button>
+                                    <!-- RX Sales Statistics -->
+                                    <div class="report-section" id="rxStats">
+                                        <h4>RX Sales Summary</h4>
+                                        <div class="stats-grid">
+                                            <div class="stat-item">
+                                                <label>Total New RX:</label>
+                                                <span id="totalNewRx">0</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <label>Total Refills:</label>
+                                                <span id="totalRefills">0</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <label>Total ReAuth:</label>
+                                                <span id="totalReAuth">0</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <label>Total Hold:</label>
+                                                <span id="totalHold">0</span>
+                                            </div>
+                                            <div class="stat-item total">
+                                                <label>Total Processed:</label>
+                                                <span id="reportTotalProcessed">0</span>
+                                            </div>
+                                        </div>
                                     </div>
+                                    <!-- Professional Services Summary -->
+                                    <div class="report-section" id="serviceStats">
+                                        <h4>Professional Services Summary</h4>
+                                        <div class="stats-grid">
+                                            <div class="stat-item">
+                                                <label>Total Services Cost:</label>
+                                                <span id="totalServices">0</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <label>Service Breakdown:</label>
+                                                <div id="serviceBreakdown" class="service-breakdown">
+                                                    <!-- Service rows will be dynamically added here -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Export Options -->
+                                <div class="export-options">
+                                    <button type="button" class="button export-button" onclick="exportToPDF()">
+                                        Export to PDF
+                                    </button>
+                                    <button type="button" class="button export-button" onclick="exportToExcel()">
+                                        Export to Excel
+                                    </button>
                                 </div>
                             </div>
                         </div>
-
-
                     </div>
+
+
                 </div>
             </div>
         </div>
