@@ -1264,3 +1264,23 @@ h3 {
         grid-template-columns: 1fr;
     }
 }
+
+/* Add these at the top of your wellca.css */
+.main {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+    padding-top: var(--header-height);
+    transition: margin-left var(--transition-speed);
+}
+
+/* Adjust for collapsed sidebar */
+nav.collapsed + .main {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+/* Responsive adjustment */
+@media (max-width: 768px) {
+    .main {
+        margin-left: 0;
+    }
+}

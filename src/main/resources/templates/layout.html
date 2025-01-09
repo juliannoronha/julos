@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <th:block th:fragment="head">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <meta name="_csrf" th:content="${_csrf.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    </th:block>
+</head>
+<body>
+    <!-- Sidebar Fragment -->
+    <nav th:fragment="sidebar" id="mainNav">
+        <div class="navbar">
+            <!-- Copy your existing sidebar content from home.html -->
+            <div class="logo">
+                <img th:src="@{/images/logo.png}" alt="Logo">
+            </div>
+            <!-- ... rest of your sidebar content ... -->
+        </div>
+    </nav>
+
+    <!-- Navbar Fragment -->
+    <div th:fragment="navbar" class="navbar-container">
+        <div class="navbar-content">
+            <div class="nav-button" title="Menu">
+                <button type="button" onclick="handleActiveMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <div class="nav-items">
+                <div class="nav-button" title="Chat">
+                    <button type="button" onclick="handleNavClick('chat')" class="notification-dot" data-dot-color="#03C9D7">
+                        <i class="fas fa-comment"></i>
+                    </button>
+                </div>
+
+                <div class="nav-button" title="Notifications">
+                    <button type="button" onclick="handleNavClick('notification')" class="notification-dot" data-dot-color="#FEC90F">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                </div>
+
+                <div class="profile-button" onclick="handleNavClick('userProfile')">
+                    <img th:src="@{/images/avatar.jpg}" alt="user-profile" class="profile-avatar"/>
+                    <div class="profile-info">
+                        <span class="greeting">Hi,</span>
+                        <span class="username" th:text="${#authentication.name}">User</span>
+                    </div>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dropdown Panels -->
+        <div id="chatPanel" class="nav-panel" style="display: none;">
+            <!-- Chat content -->
+        </div>
+        <div id="notificationPanel" class="nav-panel" style="display: none;">
+            <!-- Notification content -->
+        </div>
+        <div id="userProfilePanel" class="nav-panel" style="display: none;">
+            <!-- User profile content -->
+        </div>
+    </div>
+</body>
+</html>
