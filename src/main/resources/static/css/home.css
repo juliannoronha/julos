@@ -56,6 +56,11 @@ body[data-user-role] nav#mainNav .menu {
     padding: 1rem 0;
 }
 
+.logo img {
+    height: 80px;
+    width: auto;
+}
+
 body[data-user-role] nav#mainNav .menu-item {
     padding: 0.5rem 1rem;
 }
