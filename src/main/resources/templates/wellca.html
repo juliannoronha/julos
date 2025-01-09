@@ -5,81 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Well.ca</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" th:href="@{/css/home.css}">
     <link rel="stylesheet" th:href="@{/css/wellca.css}">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
-<body th:data-user-role="${#authentication.authorities[0]}">
+<body>
     <div sec:authorize="hasAnyRole('CHECKER', 'ADMIN', 'MODERATOR')">
-        <!-- Sidebar -->
-        <nav id="mainNav">
-            <div class="logo">
-                <img th:src="@{/images/logo.png}" alt="Logo">
-            </div>
-            <div class="menu">
-                <div class="menu-item">
-                    <a th:href="@{/}" class="menu-link">
-                        <i class="fas fa-home"></i>
-                        <span class="menu-text">Dashboard</span>
-                    </a>
-                </div>
-                
-                <div class="menu-item">
-                    <a th:href="@{/wellca}" class="menu-link">
-                        <i class="fas fa-pills"></i>
-                        <span class="menu-text">Well.ca</span>
-                    </a>
-                </div>
-
-                <div class="menu-item bottom-item">
-                    <a href="#" onclick="document.getElementById('logout-form').submit(); return false;" class="menu-link">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span class="menu-text">Logout</span>
-                    </a>
-                </div>
+        <nav class="nav-bar">
+            <div class="nav-container">
+                <a href="/home" class="nav-logo">
+                    <img src="/logo.png" alt="Logo">
+                </a>
+                <ul class="nav-links">
+                    <li><a href="/wellca-management" class="active">Well.ca</a></li>
+                    <li><a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a></li>
+                </ul>
             </div>
         </nav>
 
-        <!-- Navbar -->
-        <div class="navbar-container">
-            <div class="navbar-content">
-                <div class="nav-button" title="Menu">
-                    <button type="button" onclick="handleActiveMenu()">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
-
-                <div class="nav-items">
-                    <div class="nav-button" title="Chat">
-                        <button type="button" onclick="handleNavClick('chat')" class="notification-dot" data-dot-color="#03C9D7">
-                            <i class="fas fa-comment"></i>
-                        </button>
-                    </div>
-
-                    <div class="profile-button" onclick="handleNavClick('userProfile')">
-                        <img th:src="@{/images/avatar.jpg}" alt="user-profile" class="profile-avatar"/>
-                        <div class="profile-info">
-                            <span class="greeting">Hi,</span>
-                            <span class="username" th:text="${#authentication.name}">User</span>
-                        </div>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dropdown Panels -->
-            <div id="chatPanel" class="nav-panel" style="display: none;">
-                <!-- Chat panel content -->
-            </div>
-            <div id="userProfilePanel" class="nav-panel" style="display: none;">
-                <!-- User profile panel content -->
-            </div>
-        </div>
-    </div>
-
-    <div class="main">
         <div class="content-wrapper">
             <div class="form-container">
                 <div class="container">
@@ -364,7 +307,6 @@
         var csrfToken = /*[[${_csrf.token}]]*/ '';
         var csrfHeader = /*[[${_csrf.headerName}]]*/ '';
     </script>
-    <script th:src="@{/js/home.js}"></script>
     <script th:src="@{/js/wellca.js}"></script>
 </body>
 </html>
