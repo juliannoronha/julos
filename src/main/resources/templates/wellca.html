@@ -12,8 +12,8 @@
 </head>
 <body>
     <div sec:authorize="hasAnyRole('CHECKER', 'ADMIN', 'MODERATOR')">
-        <nav th:replace="fragments/layout :: sidebar"></nav>
-        <div th:replace="fragments/layout :: navbar"></div>
+        <nav th:replace="layout :: sidebar"></nav>
+        <div th:replace="layout :: navbar"></div>
 
         <div class="main">
             <div class="content-wrapper">
