@@ -32,6 +32,12 @@ public class CacheConfig {
     private static final int SERVICE_DETAILS_EXPIRE_MINUTES = 60;
     private static final int USER_PRODUCTIVITY_EXPIRE_MINUTES = 20;
     
+    // Cache timeouts for reports
+    private static final int WEEKLY_REPORT_EXPIRE_MINUTES = 15;
+    private static final int MONTHLY_REPORT_EXPIRE_MINUTES = 30;
+    private static final int QUARTERLY_REPORT_EXPIRE_MINUTES = 60;
+    private static final int DEFAULT_CACHE_SIZE = 100;
+    
     @Bean
     public CacheManager cacheManager() {
         logger.info("Initializing Cache Manager");
@@ -66,6 +72,27 @@ public class CacheConfig {
             Caffeine.newBuilder()
                 .expireAfterAccess(USER_PRODUCTIVITY_EXPIRE_MINUTES, TimeUnit.MINUTES)
                 .maximumSize(100) // Medium size for user data
+                .recordStats()
+                .build());
+        
+        cacheManager.registerCustomCache("weeklyChartData", 
+            Caffeine.newBuilder()
+                .expireAfterWrite(WEEKLY_REPORT_EXPIRE_MINUTES, TimeUnit.MINUTES)
+                .maximumSize(DEFAULT_CACHE_SIZE)
+                .recordStats()
+                .build());
+        
+        cacheManager.registerCustomCache("monthlyChartData", 
+            Caffeine.newBuilder()
+                .expireAfterWrite(MONTHLY_REPORT_EXPIRE_MINUTES, TimeUnit.MINUTES)
+                .maximumSize(DEFAULT_CACHE_SIZE)
+                .recordStats()
+                .build());
+        
+        cacheManager.registerCustomCache("quarterlyChartData", 
+            Caffeine.newBuilder()
+                .expireAfterWrite(QUARTERLY_REPORT_EXPIRE_MINUTES, TimeUnit.MINUTES)
+                .maximumSize(DEFAULT_CACHE_SIZE)
                 .recordStats()
                 .build());
         

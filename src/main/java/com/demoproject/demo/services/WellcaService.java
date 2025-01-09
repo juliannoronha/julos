@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 @Service
 @CacheConfig(cacheNames = {"wellcaData"})
@@ -226,5 +229,216 @@ public class WellcaService {
             "totalRevenue", totalRevenue,
             "totalServices", services.size()
         );
+    }
+
+    
+
+    /**
+     * Get monthly statistics for chart display
+     * @param yearMonth The month to get statistics for
+     * @return Map containing chart data and statistics
+     */
+    @Cacheable(value = "chartData", key = "'monthly-' + #yearMonth")
+    public Map<String, Object> getMonthlyChartStats(LocalDate yearMonth) {
+        LocalDate startDate = yearMonth.withDayOfMonth(1);
+        LocalDate endDate = yearMonth.withDayOfMonth(yearMonth.lengthOfMonth());
+        
+        logger.debug("Fetching monthly chart stats for period {} to {}", startDate, endDate);
+        
+        List<Map<String, Object>> monthlyStats = wellcaRepository.getMonthlyChartStats(startDate, endDate);
+        
+        // Prepare chart data structure
+        List<String> labels = new ArrayList<>();
+        List<Number> rxCounts = new ArrayList<>();
+        List<Number> deliveryCounts = new ArrayList<>();
+        List<Number> rxPerDelivery = new ArrayList<>();
+        List<Number> servicesCounts = new ArrayList<>();
+        
+        monthlyStats.forEach(stat -> {
+            LocalDate date = (LocalDate) stat.get("date");
+            labels.add(date.format(DateTimeFormatter.ofPattern("MMM dd")));
+            
+            Long totalRx = (Long) stat.get("totalRx");
+            Long totalDeliveries = (Long) stat.get("totalDeliveries");
+            Long totalServices = (Long) stat.get("professionalServices");
+            
+            rxCounts.add(totalRx);
+            deliveryCounts.add(totalDeliveries);
+            rxPerDelivery.add(totalDeliveries > 0 ? 
+                (double) totalRx / totalDeliveries : 0);
+            servicesCounts.add(totalServices);
+        });
+        
+        Map<String, Object> chartData = new HashMap<>();
+        chartData.put("labels", labels);
+        chartData.put("datasets", Map.of(
+            "rxCount", rxCounts,
+            "deliveries", deliveryCounts,
+            "rxPerDelivery", rxPerDelivery,
+            "services", servicesCounts
+        ));
+        
+        logger.debug("Generated chart data with {} data points", labels.size());
+        return chartData;
+    }
+
+    /**
+     * Get quarterly statistics for chart display
+     * @param year The year to get statistics for
+     * @param quarter The quarter (1-4)
+     * @return Map containing chart data and statistics
+     */
+    @Cacheable(value = "chartData", key = "'quarterly-' + #year + '-Q' + #quarter")
+    public Map<String, Object> getQuarterlyChartStats(int year, int quarter) {
+        logger.debug("Fetching quarterly chart stats for Q{} {}", quarter, year);
+        
+        if (quarter < 1 || quarter > 4) {
+            throw new IllegalArgumentException("Quarter must be between 1 and 4");
+        }
+        
+        List<Map<String, Object>> quarterlyStats = wellcaRepository.getQuarterlyChartStats(year, quarter);
+        
+        // Prepare chart data structure
+        List<String> labels = new ArrayList<>();
+        List<Number> rxCounts = new ArrayList<>();
+        List<Number> deliveryCounts = new ArrayList<>();
+        List<Number> rxPerDelivery = new ArrayList<>();
+        List<Number> servicesCounts = new ArrayList<>();
+        
+        // Get month names for the quarter
+        String[] monthNames = getMonthsForQuarter(quarter);
+        
+        // Initialize data for all three months of the quarter
+        for (String month : monthNames) {
+            labels.add(month + " " + year);
+        }
+        
+        // Map the data to the correct months
+        quarterlyStats.forEach(stat -> {
+            int monthIndex = ((Integer) stat.get("month") - 1) % 3;
+            
+            Long totalRx = (Long) stat.get("totalRx");
+            Long totalDeliveries = (Long) stat.get("totalDeliveries");
+            Long totalServices = (Long) stat.get("totalServices");
+            
+            rxCounts.add(monthIndex, totalRx);
+            deliveryCounts.add(monthIndex, totalDeliveries);
+            rxPerDelivery.add(monthIndex, totalDeliveries > 0 ? 
+                (double) totalRx / totalDeliveries : 0);
+            servicesCounts.add(monthIndex, totalServices);
+        });
+        
+        Map<String, Object> chartData = new HashMap<>();
+        chartData.put("labels", labels);
+        chartData.put("datasets", Map.of(
+            "rxCount", rxCounts,
+            "deliveries", deliveryCounts,
+            "rxPerDelivery", rxPerDelivery,
+            "services", servicesCounts
+        ));
+        
+        logger.debug("Generated quarterly chart data with {} data points", labels.size());
+        return chartData;
+    }
+    
+    /**
+     * Helper method to get month names for a quarter
+     */
+    private String[] getMonthsForQuarter(int quarter) {
+        String[] allMonths = {"January", "February", "March", "April", "May", "June", 
+                             "July", "August", "September", "October", "November", "December"};
+        int startMonth = (quarter - 1) * 3;
+        return new String[]{
+            allMonths[startMonth],
+            allMonths[startMonth + 1],
+            allMonths[startMonth + 2]
+        };
+    }
+
+    /**
+     * Get weekly statistics for charts with progressive loading
+     * @param startDate Start of the period
+     * @param endDate End of the period
+     * @param page Page number (1-based) for progressive loading
+     * @return Map containing chart data and statistics
+     */
+    @Cacheable(value = "chartData", key = "'weekly-' + #startDate + '-' + #endDate + '-page-' + #page")
+    public Map<String, Object> getWeeklyChartStats(LocalDate startDate, LocalDate endDate, int page) {
+        logger.debug("Fetching weekly chart stats for period {} to {}, page {}", startDate, endDate, page);
+        
+        final int WEEKS_PER_PAGE = 4;
+        LocalDate adjustedStartDate = startDate.plusWeeks((page - 1) * WEEKS_PER_PAGE);
+        LocalDate adjustedEndDate = adjustedStartDate.plusWeeks(WEEKS_PER_PAGE);
+        
+        // Ensure we don't exceed the original end date
+        if (adjustedEndDate.isAfter(endDate)) {
+            adjustedEndDate = endDate;
+        }
+        
+        List<Map<String, Object>> weeklyStats = wellcaRepository.getWeeklyChartStats(
+            adjustedStartDate, 
+            adjustedEndDate
+        );
+        
+        // Calculate total number of weeks for pagination
+        long totalWeeks = ChronoUnit.WEEKS.between(startDate, endDate);
+        int totalPages = (int) Math.ceil((double) totalWeeks / WEEKS_PER_PAGE);
+        
+        // Prepare chart data structure
+        List<String> labels = new ArrayList<>();
+        List<Number> rxCounts = new ArrayList<>();
+        List<Number> deliveryCounts = new ArrayList<>();
+        List<Number> rxPerDelivery = new ArrayList<>();
+        List<Number> servicesCounts = new ArrayList<>();
+        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
+        
+        weeklyStats.forEach(stat -> {
+            LocalDate weekEnd = (LocalDate) stat.get("weekEndDate");
+            labels.add(weekEnd.format(formatter));
+            
+            Long totalRx = (Long) stat.get("totalRx");
+            Long totalDeliveries = (Long) stat.get("totalDeliveries");
+            Long totalServices = (Long) stat.get("totalServices");
+            
+            rxCounts.add(totalRx);
+            deliveryCounts.add(totalDeliveries);
+            rxPerDelivery.add(totalDeliveries > 0 ? 
+                (double) totalRx / totalDeliveries : 0);
+            servicesCounts.add(totalServices);
+        });
+        
+        Map<String, Object> chartData = new HashMap<>();
+        chartData.put("labels", labels);
+        chartData.put("datasets", Map.of(
+            "rxCount", rxCounts,
+            "deliveries", deliveryCounts,
+            "rxPerDelivery", rxPerDelivery,
+            "services", servicesCounts
+        ));
+        
+        // Add pagination metadata
+        chartData.put("pagination", Map.of(
+            "currentPage", page,
+            "totalPages", totalPages,
+            "hasMore", page < totalPages
+        ));
+        
+        logger.debug("Generated weekly chart data with {} data points for page {}", 
+            labels.size(), page);
+        
+        return chartData;
+    }
+    
+    /**
+     * Get total number of weeks between dates
+     * @param startDate Start of period
+     * @param endDate End of period
+     * @return Total number of pages for weekly data
+     */
+    public int getTotalWeeklyPages(LocalDate startDate, LocalDate endDate) {
+        final int WEEKS_PER_PAGE = 4;
+        long totalWeeks = ChronoUnit.WEEKS.between(startDate, endDate);
+        return (int) Math.ceil((double) totalWeeks / WEEKS_PER_PAGE);
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -91,5 +92,67 @@ public interface WellcaRepository extends JpaRepository<Wellca, Long> {
         String serviceType, 
         LocalDate startDate, 
         LocalDate endDate
+    );
+
+    /**
+     * Get comprehensive monthly statistics for charts
+     * @param startDate Start of the month
+     * @param endDate End of the month
+     * @return Monthly aggregated data for charts
+     */
+    @Query("SELECT NEW map(" +
+           "w.date as date, " +
+           "SUM(w.purolator + w.fedex + w.oneCourier + w.goBolt) as totalDeliveries, " +
+           "SUM(w.newRx + w.refill + w.reAuth) as totalRx, " +
+           "COUNT(CASE WHEN w.serviceType IS NOT NULL THEN 1 END) as totalServices, " +
+           "SUM(CASE WHEN w.serviceType IS NOT NULL THEN 1 ELSE 0 END) as professionalServices) " +
+           "FROM Wellca w " +
+           "WHERE w.date BETWEEN :startDate AND :endDate " +
+           "GROUP BY w.date " +
+           "ORDER BY w.date")
+    List<java.util.Map<String, Object>> getMonthlyChartStats(
+        @Param("startDate") LocalDate startDate, 
+        @Param("endDate") LocalDate endDate
+    );
+
+    /**
+     * Get quarterly statistics for charts
+     * @param year The year
+     * @param quarter The quarter (1-4)
+     * @return Quarterly aggregated data for charts
+     */
+    @Query("SELECT NEW map(" +
+           "FUNCTION('MONTH', w.date) as month, " +
+           "SUM(w.purolator + w.fedex + w.oneCourier + w.goBolt) as totalDeliveries, " +
+           "SUM(w.newRx + w.refill + w.reAuth) as totalRx, " +
+           "COUNT(CASE WHEN w.serviceType IS NOT NULL THEN 1 END) as totalServices) " +
+           "FROM Wellca w " +
+           "WHERE FUNCTION('YEAR', w.date) = :year " +
+           "AND FUNCTION('QUARTER', w.date) = :quarter " +
+           "GROUP BY FUNCTION('MONTH', w.date) " +
+           "ORDER BY FUNCTION('MONTH', w.date)")
+    List<Map<String, Object>> getQuarterlyChartStats(
+        @Param("year") int year,
+        @Param("quarter") int quarter
+    );
+
+    /**
+     * Get weekly statistics for charts with progressive loading
+     * @param startDate Start of the week
+     * @param endDate End of the week
+     * @return Weekly aggregated data for charts
+     */
+    @Query("SELECT NEW map(" +
+           "MAX(w.date) as weekEndDate, " +  // Get the end date of each week
+           "SUM(w.purolator + w.fedex + w.oneCourier + w.goBolt) as totalDeliveries, " +
+           "SUM(w.newRx + w.refill + w.reAuth) as totalRx, " +
+           "COUNT(CASE WHEN w.serviceType IS NOT NULL THEN 1 END) as totalServices) " +
+           "FROM Wellca w " +
+           "WHERE w.date BETWEEN :startDate AND :endDate " +
+           "GROUP BY FUNCTION('YEARWEEK', w.date) " +  // Group by week
+           "ORDER BY weekEndDate")
+    List<Map<String, Object>> getWeeklyChartStats(
+        @Param("startDate") LocalDate startDate, 
+        @Param("endDate") LocalDate endDate
     );
 }

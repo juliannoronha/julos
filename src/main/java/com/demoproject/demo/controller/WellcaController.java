@@ -301,4 +301,111 @@ public class WellcaController {
         Map<String, Object> stats = wellcaService.getMonthlyServiceStats(yearMonth);
         return ResponseEntity.ok(stats);
     }
+
+    /**
+     * Get monthly chart statistics
+     */
+    @GetMapping("/monthly-chart-stats/{yearMonth}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<Map<String, Object>> getMonthlyChartStats(
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM") LocalDate yearMonth) {
+        try {
+            logger.debug("Fetching monthly chart stats for: {}", yearMonth);
+            Map<String, Object> chartData = wellcaService.getMonthlyChartStats(yearMonth);
+            return ResponseEntity.ok(chartData);
+        } catch (Exception e) {
+            logger.error("Error fetching monthly chart stats: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Get quarterly chart statistics
+     */
+    @GetMapping("/quarterly-chart-stats/{year}/{quarter}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<Map<String, Object>> getQuarterlyChartStats(
+            @PathVariable int year,
+            @PathVariable int quarter) {
+        try {
+            logger.debug("Fetching quarterly chart stats for Q{} {}", quarter, year);
+            Map<String, Object> chartData = wellcaService.getQuarterlyChartStats(year, quarter);
+            return ResponseEntity.ok(chartData);
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid quarter value: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            logger.error("Error fetching quarterly chart stats: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Get weekly chart statistics with progressive loading
+     */
+    @GetMapping("/weekly-chart-stats")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<Map<String, Object>> getWeeklyChartStats(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "1") int page) {
+        try {
+            logger.debug("Fetching weekly chart stats for period {} to {}, page {}", 
+                startDate, endDate, page);
+
+            // Validate date range
+            if (startDate.isAfter(endDate)) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Start date must be before end date"));
+            }
+
+            // Validate page number
+            int totalPages = wellcaService.getTotalWeeklyPages(startDate, endDate);
+            if (page < 1 || page > totalPages) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Invalid page number", "totalPages", totalPages));
+            }
+
+            Map<String, Object> chartData = wellcaService.getWeeklyChartStats(
+                startDate, endDate, page);
+
+            return ResponseEntity.ok(chartData);
+
+        } catch (Exception e) {
+            logger.error("Error fetching weekly chart stats: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError()
+                .body(Map.of("error", "Failed to fetch weekly chart statistics"));
+        }
+    }
+
+    /**
+     * Get total pages for weekly chart data
+     */
+    @GetMapping("/weekly-chart-stats/pages")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<Map<String, Object>> getWeeklyChartPages(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        try {
+            logger.debug("Calculating total pages for weekly chart stats between {} and {}", 
+                startDate, endDate);
+
+            if (startDate.isAfter(endDate)) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Start date must be before end date"));
+            }
+
+            int totalPages = wellcaService.getTotalWeeklyPages(startDate, endDate);
+            
+            return ResponseEntity.ok(Map.of(
+                "totalPages", totalPages,
+                "weeksPerPage", 4
+            ));
+
+        } catch (Exception e) {
+            logger.error("Error calculating weekly chart pages: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError()
+                .body(Map.of("error", "Failed to calculate total pages"));
+        }
+    }
 }
