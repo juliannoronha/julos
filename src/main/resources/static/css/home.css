@@ -30,7 +30,7 @@ body {
 }
 
 /* Navigation Layout */
-nav {
+body[data-user-role] nav#mainNav {
     width: var(--sidebar-width);
     height: 100vh;
     position: fixed;
@@ -43,8 +43,7 @@ nav {
     z-index: 1000;
 }
 
-/* Logo Section */
-.logo {
+body[data-user-role] nav#mainNav .logo {
     padding: 1.5rem 1rem;
     display: flex;
     justify-content: center;
@@ -53,9 +52,36 @@ nav {
     margin-bottom: 1rem;
 }
 
-.logo img {
-    height: 80px;
-    width: auto;
+body[data-user-role] nav#mainNav .menu {
+    padding: 1rem 0;
+}
+
+body[data-user-role] nav#mainNav .menu-item {
+    padding: 0.5rem 1rem;
+}
+
+body[data-user-role] nav#mainNav .menu-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--text-color);
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    transition: background-color var(--transition-speed);
+}
+
+body[data-user-role] nav#mainNav .menu-link:hover {
+    background-color: var(--hover-bg);
+}
+
+body[data-user-role] nav#mainNav .menu-link i {
+    width: 24px;
+    margin-right: 12px;
+    font-size: 1.1rem;
+}
+
+body[data-user-role] nav#mainNav .bottom-item {
+    margin-top: auto;
 }
 
 /* Navigation Lists */
