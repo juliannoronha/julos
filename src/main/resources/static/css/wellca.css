@@ -1266,21 +1266,19 @@ h3 {
 }
 
 /* Add these at the top of your wellca.css */
-.main {
+body[data-user-role] .main {
     margin-left: var(--sidebar-width);
     min-height: 100vh;
     padding-top: var(--header-height);
     transition: margin-left var(--transition-speed);
 }
 
-/* Adjust for collapsed sidebar */
-nav.collapsed + .main {
+body[data-user-role] nav.collapsed + .main {
     margin-left: var(--sidebar-collapsed-width);
 }
 
-/* Responsive adjustment */
 @media (max-width: 768px) {
-    .main {
+    body[data-user-role] .main {
         margin-left: 0;
     }
 }
