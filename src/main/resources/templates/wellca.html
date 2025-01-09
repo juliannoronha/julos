@@ -15,31 +15,29 @@
     <div sec:authorize="hasAnyRole('CHECKER', 'ADMIN', 'MODERATOR')">
         <!-- Sidebar -->
         <nav id="mainNav">
-            <div class="navbar">
-                <div class="logo">
-                    <img th:src="@{/images/logo.png}" alt="Logo">
+            <div class="logo">
+                <img th:src="@{/images/logo.png}" alt="Logo">
+            </div>
+            <div class="menu">
+                <div class="menu-item">
+                    <a th:href="@{/}" class="menu-link">
+                        <i class="fas fa-home"></i>
+                        <span class="menu-text">Dashboard</span>
+                    </a>
                 </div>
-                <div class="menu">
-                    <div class="menu-item">
-                        <a th:href="@{/}" class="menu-link">
-                            <i class="fas fa-home"></i>
-                            <span class="menu-text">Dashboard</span>
-                        </a>
-                    </div>
-                    
-                    <div class="menu-item">
-                        <a th:href="@{/wellca}" class="menu-link">
-                            <i class="fas fa-pills"></i>
-                            <span class="menu-text">Well.ca</span>
-                        </a>
-                    </div>
+                
+                <div class="menu-item">
+                    <a th:href="@{/wellca}" class="menu-link">
+                        <i class="fas fa-pills"></i>
+                        <span class="menu-text">Well.ca</span>
+                    </a>
+                </div>
 
-                    <div class="menu-item bottom-item">
-                        <a href="#" onclick="document.getElementById('logout-form').submit(); return false;" class="menu-link">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span class="menu-text">Logout</span>
-                        </a>
-                    </div>
+                <div class="menu-item bottom-item">
+                    <a href="#" onclick="document.getElementById('logout-form').submit(); return false;" class="menu-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="menu-text">Logout</span>
+                    </a>
                 </div>
             </div>
         </nav>
