@@ -413,8 +413,12 @@ async function submitForm(formData) {
 
 // Add date validation function
 function validateDateRange() {
-    const startDate = new Date(document.getElementById('startDate').value);
-    const endDate = new Date(document.getElementById('endDate').value);
+    const startDateInput = document.getElementById('startDate').value;
+    const endDateInput = document.getElementById('endDate').value;
+    
+    // Create dates at noon to avoid timezone issues
+    const startDate = new Date(startDateInput + 'T12:00:00');
+    const endDate = new Date(endDateInput + 'T12:00:00');
     
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
         showErrorMessage('Please select valid dates');
@@ -487,8 +491,8 @@ function updateReportDisplay(data) {
         // Process data for chart
         if (data.length > 0) {
             data.forEach(entry => {
-                // Add date label
-                const date = new Date(entry.date);
+                // Add date label with consistent timezone handling
+                const date = new Date(entry.date + 'T12:00:00');
                 chartData.labels.push(date.toLocaleDateString());
                 
                 // Calculate totals for each metric
@@ -574,7 +578,8 @@ function updateReportDisplay(data) {
 
             data.forEach(entry => {
                 if (entry.serviceType && entry.serviceCost) {
-                    const date = new Date(entry.date);
+                    // Add T12:00:00 to ensure consistent date handling
+                    const date = new Date(entry.date + 'T12:00:00');
                     const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
                     
                     if (!monthlyServices.has(monthKey)) {
@@ -598,10 +603,13 @@ function updateReportDisplay(data) {
                 
                 monthlyServices.forEach((services, monthKey) => {
                     const [year, month] = monthKey.split('-');
-                    const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long' });
+                    // Create date with time to ensure consistent handling
+                    const date = new Date(`${year}-${month}-01T12:00:00`);
+                    const monthName = date.toLocaleString('default', { month: 'long' });
+                    const yearNum = date.getFullYear();
                     
                     html += `<div class="month-section">
-                        <h5>${monthName} ${year}</h5>`;
+                        <h5>${monthName} ${yearNum}</h5>`;
                     
                     services.forEach((entries, serviceType) => {
                         const totalCost = entries.reduce((sum, entry) => 
@@ -992,9 +1000,8 @@ function updateServiceBreakdown(data) {
 function formatDate(dateString) {
     if (!dateString) return 'N/A';
     try {
-        // Add one day to compensate for timezone display issue
-        const date = new Date(dateString);
-        date.setDate(date.getDate() + 1);
+        // Use consistent timezone handling
+        const date = new Date(dateString + 'T12:00:00');
         return date.toLocaleDateString();
     } catch (error) {
         console.error('Error formatting date:', error);
@@ -1014,7 +1021,7 @@ function renderServiceBreakdown(data) {
     const monthlyServices = new Map();
     
     serviceEntries.forEach(entry => {
-        const date = new Date(entry.date);
+        const date = new Date(entry.date + 'T12:00:00');
         const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
         
         if (!monthlyServices.has(monthKey)) {
@@ -1037,7 +1044,8 @@ function renderServiceBreakdown(data) {
         
         monthlyServices.forEach((services, monthKey) => {
             const [year, month] = monthKey.split('-');
-            const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long' });
+            const date = new Date(`${year}-${month}-01T12:00:00`);
+            const monthName = date.toLocaleString('default', { month: 'long' });
             
             html += `<div class="month-section">
                 <h5>${monthName} ${year}</h5>`;
