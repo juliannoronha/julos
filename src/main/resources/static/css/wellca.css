@@ -151,9 +151,15 @@ h3 {
     gap: var(--spacing-sm);
     margin-bottom: var(--spacing-lg);
     border-bottom: 2px solid var(--border-color);
+    justify-content: center;
+    align-items: center;
+    padding: 0 var(--spacing-md);
 }
 
 .tab-button {
+    flex: 0 1 auto;
+    min-width: 120px;
+    text-align: center;
     padding: var(--spacing-md) var(--spacing-lg);
     border: none;
     background: none;
@@ -713,9 +719,29 @@ h3 {
 .report-selector,
 .date-range-selector {
     display: flex;
-    gap: var(--spacing-md);
+    flex-direction: row;
+    justify-content: center;
     align-items: center;
-    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 0.5rem auto;
+    max-width: 800px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .date-range-selector {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .date-range-selector .form-group {
+        width: 100%;
+    }
+    
+    .date-range-selector .generate-button {
+        align-self: center;
+        width: 100%;
+    }
 }
 
 .generate-button {
@@ -1263,4 +1289,17 @@ h3 {
     .detail-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Hide date selector when reports tab is active */
+.tab-content #reports.tab-pane.active ~ .date-selector,
+.tab-navigation .tab-button[data-tab="reports"].active ~ .date-selector,
+body:has(.tab-button[data-tab="reports"].active) .date-selector {
+    display: none !important; /* Use !important to ensure override */
+    visibility: hidden; /* Double ensure it's hidden */
+    opacity: 0; /* Make it fully transparent */
+    height: 0; /* Collapse the space */
+    margin: 0; /* Remove margin */
+    padding: 0; /* Remove padding */
+    overflow: hidden; /* Prevent content from showing */
 }
