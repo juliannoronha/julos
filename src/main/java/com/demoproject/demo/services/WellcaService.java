@@ -10,6 +10,9 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import java.util.concurrent.CompletableFuture;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -238,7 +241,9 @@ public class WellcaService {
      * @param yearMonth The month to get statistics for
      * @return Map containing chart data and statistics
      */
-    @Cacheable(value = "chartData", key = "'monthly-' + #yearMonth")
+    @Transactional(readOnly = true)
+    @BatchSize(size = 100)
+    @Cacheable(value = "monthlyChartData", key = "'monthly-' + #yearMonth")
     public Map<String, Object> getMonthlyChartStats(LocalDate yearMonth) {
         LocalDate startDate = yearMonth.withDayOfMonth(1);
         LocalDate endDate = yearMonth.withDayOfMonth(yearMonth.lengthOfMonth());
@@ -260,7 +265,7 @@ public class WellcaService {
             
             Long totalRx = (Long) stat.get("totalRx");
             Long totalDeliveries = (Long) stat.get("totalDeliveries");
-            Long totalServices = (Long) stat.get("professionalServices");
+            Long totalServices = (Long) stat.get("totalServices");
             
             rxCounts.add(totalRx);
             deliveryCounts.add(totalDeliveries);
@@ -282,13 +287,20 @@ public class WellcaService {
         return chartData;
     }
 
+    @Async
+    public CompletableFuture<Map<String, Object>> getMonthlyChartStatsAsync(LocalDate yearMonth) {
+        return CompletableFuture.completedFuture(getMonthlyChartStats(yearMonth));
+    }
+
     /**
      * Get quarterly statistics for chart display
      * @param year The year to get statistics for
      * @param quarter The quarter (1-4)
      * @return Map containing chart data and statistics
      */
-    @Cacheable(value = "chartData", key = "'quarterly-' + #year + '-Q' + #quarter")
+    @Transactional(readOnly = true)
+    @BatchSize(size = 100)
+    @Cacheable(value = "quarterlyChartData", key = "'quarterly-' + #year + '-Q' + #quarter")
     public Map<String, Object> getQuarterlyChartStats(int year, int quarter) {
         logger.debug("Fetching quarterly chart stats for Q{} {}", quarter, year);
         
@@ -341,6 +353,11 @@ public class WellcaService {
         return chartData;
     }
     
+    @Async
+    public CompletableFuture<Map<String, Object>> getQuarterlyChartStatsAsync(int year, int quarter) {
+        return CompletableFuture.completedFuture(getQuarterlyChartStats(year, quarter));
+    }
+    
     /**
      * Helper method to get month names for a quarter
      */
@@ -362,7 +379,9 @@ public class WellcaService {
      * @param page Page number (1-based) for progressive loading
      * @return Map containing chart data and statistics
      */
-    @Cacheable(value = "chartData", key = "'weekly-' + #startDate + '-' + #endDate + '-page-' + #page")
+    @Transactional(readOnly = true)
+    @BatchSize(size = 100)
+    @Cacheable(value = "weeklyChartData", key = "'weekly-' + #startDate + '-' + #endDate + '-page-' + #page")
     public Map<String, Object> getWeeklyChartStats(LocalDate startDate, LocalDate endDate, int page) {
         logger.debug("Fetching weekly chart stats for period {} to {}, page {}", startDate, endDate, page);
         
@@ -428,6 +447,12 @@ public class WellcaService {
             labels.size(), page);
         
         return chartData;
+    }
+    
+    @Async
+    public CompletableFuture<Map<String, Object>> getWeeklyChartStatsAsync(
+            LocalDate startDate, LocalDate endDate, int page) {
+        return CompletableFuture.completedFuture(getWeeklyChartStats(startDate, endDate, page));
     }
     
     /**
