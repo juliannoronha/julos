@@ -337,9 +337,56 @@ async function updateReportDisplay(data) {
         if (breakdownContainer) {
             breakdownContainer.innerHTML = '';
             Object.entries(servicesStats.serviceTypes).forEach(([type, count]) => {
+                // Create main row
                 const row = document.createElement('div');
-                row.className = 'service-row';
+                row.className = 'service-type-row';
                 row.textContent = `${type}: ${count}`;
+
+                // Create details container
+                const detailsContainer = document.createElement('div');
+                detailsContainer.className = 'service-details';
+
+                // Filter entries for this service type
+                const serviceEntries = data.filter(entry => entry.serviceType === type);
+
+                // Create details content
+                serviceEntries.forEach(entry => {
+                    const detailItem = document.createElement('div');
+                    detailItem.className = 'detail-item';
+
+                    const details = [
+                        { label: 'Patient Name', value: entry.patientName },
+                        { label: 'Patient DOB', value: entry.patientDob },
+                        { label: 'Pharmacist', value: entry.pharmacistName },
+                        { label: 'Cost', value: `$${entry.serviceCost.toFixed(2)}` }
+                    ];
+
+                    details.forEach(({ label, value }) => {
+                        if (value) {
+                            const labelElement = document.createElement('label');
+                            labelElement.textContent = label;
+                            const valueElement = document.createElement('span');
+                            valueElement.textContent = value;
+                            detailItem.appendChild(labelElement);
+                            detailItem.appendChild(valueElement);
+                        }
+                    });
+
+                    detailsContainer.appendChild(detailItem);
+                });
+
+                // Add click handler
+                row.addEventListener('click', () => {
+                    const wasActive = detailsContainer.classList.contains('active');
+                    // Close all other active details
+                    document.querySelectorAll('.service-details.active').forEach(el => {
+                        el.classList.remove('active');
+                    });
+                    // Toggle this detail
+                    detailsContainer.classList.toggle('active', !wasActive);
+                });
+
+                row.appendChild(detailsContainer);
                 breakdownContainer.appendChild(row);
             });
         }
@@ -427,7 +474,6 @@ async function updateChart(data) {
             
             return acc;
         }, {});
-
         // Convert grouped data to arrays
         Object.entries(groupedData).forEach(([date, values]) => {
             // Create date at noon UTC
