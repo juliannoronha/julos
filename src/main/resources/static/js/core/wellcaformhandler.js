@@ -16,6 +16,10 @@ import {
     VALIDATION_MESSAGES,
     MESSAGE_TYPES
 } from '../config/wellcaconstants.js';
+import { 
+    showMessage, 
+    showErrorMessage 
+} from '../services/wellcamessage.js';
 
 /* ------------------------------------------------------------------------- 
  * Form Setup and Handlers
@@ -25,6 +29,78 @@ export function setupFormHandlers() {
     setupRxCalculations();
     setupProfilesCalculations();
     setupServicesForm();
+
+    // Add form submission handlers
+    const deliveryForm = document.getElementById(FORM_IDS.DELIVERY);
+    const rxForm = document.getElementById(FORM_IDS.RX);
+    
+    if (deliveryForm) {
+        deliveryForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitButton = deliveryForm.querySelector('button[type="submit"]');
+            if (submitButton) submitButton.disabled = true;
+            
+            try {
+                const formData = {
+                    date: document.getElementById(INPUT_FIELDS.DATE).value,
+                    // Delivery fields
+                    purolator: parseInt(document.getElementById(INPUT_FIELDS.DELIVERY[0]).value) || 0,
+                    fedex: parseInt(document.getElementById(INPUT_FIELDS.DELIVERY[1]).value) || 0,
+                    oneCourier: parseInt(document.getElementById(INPUT_FIELDS.DELIVERY[2]).value) || 0,
+                    goBolt: parseInt(document.getElementById(INPUT_FIELDS.DELIVERY[3]).value) || 0,
+                    // Initialize RX fields with defaults
+                    newRx: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    refill: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    reAuth: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    hold: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    // Initialize profile fields with defaults
+                    profilesEntered: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    whoFilledRx: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    activePercentage: DEFAULT_VALUES.ACTIVE_PERCENTAGE,
+                    // Initialize service fields with defaults
+                    serviceType: '',
+                    serviceCost: DEFAULT_VALUES.SERVICE_COST,
+                    patientName: '',
+                    patientDob: '',
+                    pharmacistName: ''
+                };
+                
+                await wellcaApi.submitForm(formData);
+                showMessage(VALIDATION_MESSAGES.SUBMISSION_SUCCESS, MESSAGE_TYPES.SUCCESS);
+                deliveryForm.reset();
+            } catch (error) {
+                showMessage(VALIDATION_MESSAGES.SUBMISSION_ERROR + error.message, MESSAGE_TYPES.ERROR);
+            } finally {
+                if (submitButton) submitButton.disabled = false;
+            }
+        });
+    }
+
+    if (rxForm) {
+        rxForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitButton = rxForm.querySelector('button[type="submit"]');
+            if (submitButton) submitButton.disabled = true;
+            
+            try {
+                const formData = {
+                    date: document.getElementById(INPUT_FIELDS.DATE).value,
+                    newRx: parseInt(document.getElementById(INPUT_FIELDS.RX[0]).value) || 0,
+                    refill: parseInt(document.getElementById(INPUT_FIELDS.RX[1]).value) || 0,
+                    reAuth: parseInt(document.getElementById(INPUT_FIELDS.RX[2]).value) || 0,
+                    hold: parseInt(document.getElementById(INPUT_FIELDS.RX[3]).value) || 0
+                };
+                
+                await wellcaApi.submitForm(formData);
+                showMessage(VALIDATION_MESSAGES.SUBMISSION_SUCCESS, MESSAGE_TYPES.SUCCESS);
+                rxForm.reset();
+            } catch (error) {
+                showMessage(VALIDATION_MESSAGES.SUBMISSION_ERROR + error.message, MESSAGE_TYPES.ERROR);
+            } finally {
+                if (submitButton) submitButton.disabled = false;
+            }
+        });
+    }
 }
 
 function setupDeliveryCalculations() {
