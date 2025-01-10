@@ -166,8 +166,10 @@ function formatDate(dateString) {
 }
 
 function formatServiceType(type) {
-    return type ? type.replace(/_/g, ' ').toLowerCase()
-        .replace(/\b\w/g, char => char.toUpperCase()) : 'N/A';
+    return type
+        .split('_')
+        .map(word => word.charAt(0) + word.slice(1).toLowerCase())
+        .join(' ');
 }
 
 /* ------------------------------------------------------------------------- 
@@ -340,7 +342,9 @@ async function updateReportDisplay(data) {
                 // Create main row
                 const row = document.createElement('div');
                 row.className = 'service-type-row';
-                row.textContent = `${type}: ${count}`;
+                
+                const formattedType = formatServiceType(type);
+                row.textContent = `${formattedType} (${count})`;
 
                 // Create details container
                 const detailsContainer = document.createElement('div');
