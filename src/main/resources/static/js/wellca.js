@@ -60,8 +60,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const reportsTab = document.querySelector(`[${TAB_CONFIG.DATA_ATTRIBUTE}="${TAB_CONFIG.REPORTS_ID}"]`);
     if (reportsTab) {
         reportsTab.addEventListener('click', function() {
-            if (!reportChart) {
-                initializeChart();
+            try {
+                if (!reportChart) {
+                    console.log('Initializing chart...');
+                    initializeChart();
+                }
+            } catch (error) {
+                console.error('Error in reports tab click handler:', error);
+                showMessage(VALIDATION_MESSAGES.CHART_ERROR + error.message, MESSAGE_TYPES.ERROR);
             }
         });
     }
@@ -248,66 +254,70 @@ async function generateReport() {
 /* ------------------------------------------------------------------------- 
  * Chart and Display Functions
  * --------------------------------------------------------------------- */
-function updateReportDisplay(data) {
+async function updateReportDisplay(data) {
+    console.log('Received report data:', data);
+    
     try {
-        // Prepare chart data
-        const chartData = {
-            labels: [],
-            datasets: {
-                rxCount: [],
-                deliveries: [],
-                rxPerDelivery: [],
-                services: []
-            }
+        // Update delivery statistics
+        const deliveryStats = {
+            purolator: 0,
+            fedex: 0,
+            oneCourier: 0,
+            goBolt: 0
         };
 
-        if (data.length > 0) {
-            // Create a map to store service counts by date
-            const serviceCountsByDate = new Map();
+        // Update RX statistics
+        const rxStats = {
+            newRx: 0,
+            refill: 0,
+            reAuth: 0,
+            hold: 0,
+            totalProcessed: 0
+        };
+
+        // Process data
+        data.forEach(entry => {
+            console.log('Processing entry:', entry);
             
-            // First pass: Count services for each date
-            data.forEach(entry => {
-                if (entry.serviceType) {
-                    const dateKey = new Date(entry.date + DATE_CONFIG.ISO_FORMAT).toLocaleDateString();
-                    serviceCountsByDate.set(dateKey, (serviceCountsByDate.get(dateKey) || 0) + 1);
-                }
-            });
+            // Delivery stats
+            deliveryStats.purolator += entry.purolator || 0;
+            deliveryStats.fedex += entry.fedex || 0;
+            deliveryStats.oneCourier += entry.oneCourier || 0;
+            deliveryStats.goBolt += entry.goBolt || 0;
 
-            // Second pass: Process all data for chart
-            data.forEach(entry => {
-                const date = new Date(entry.date + DATE_CONFIG.ISO_FORMAT);
-                const dateKey = date.toLocaleDateString();
-                chartData.labels.push(dateKey);
-                
-                // Calculate totals for each metric
-                const totalRx = (entry.newRx || DEFAULT_VALUES.NUMERIC_FIELDS) + 
-                               (entry.refill || DEFAULT_VALUES.NUMERIC_FIELDS) + 
-                               (entry.reAuth || DEFAULT_VALUES.NUMERIC_FIELDS);
-                               
-                const totalDeliveries = (entry.purolator || DEFAULT_VALUES.NUMERIC_FIELDS) + 
-                                      (entry.fedex || DEFAULT_VALUES.NUMERIC_FIELDS) + 
-                                      (entry.oneCourier || DEFAULT_VALUES.NUMERIC_FIELDS) + 
-                                      (entry.goBolt || DEFAULT_VALUES.NUMERIC_FIELDS);
-                
-                const servicesCount = serviceCountsByDate.get(dateKey) || DEFAULT_VALUES.NUMERIC_FIELDS;
-                
-                chartData.datasets.rxCount.push(totalRx);
-                chartData.datasets.deliveries.push(totalDeliveries);
-                chartData.datasets.rxPerDelivery.push(
-                    totalDeliveries > 0 ? totalRx / totalDeliveries : DEFAULT_VALUES.NUMERIC_FIELDS
-                );
-                chartData.datasets.services.push(servicesCount);
-            });
-        } else {
-            showMessage(VALIDATION_MESSAGES.NO_DATA_AVAILABLE, MESSAGE_TYPES.WARNING);
-        }
+            // RX stats
+            rxStats.newRx += entry.newRx || 0;
+            rxStats.refill += entry.refill || 0;
+            rxStats.reAuth += entry.reAuth || 0;
+            rxStats.hold += entry.hold || 0;
+        });
 
-        updateChart(chartData);
-        updateDeliveryStatistics(data);
+        // Calculate total processed
+        rxStats.totalProcessed = rxStats.newRx + rxStats.refill + rxStats.reAuth + rxStats.hold;
 
+        console.log('Processed delivery stats:', deliveryStats);
+        console.log('Processed RX stats:', rxStats);
+
+        // Update delivery statistics display
+        document.getElementById('totalPurolator').textContent = deliveryStats.purolator;
+        document.getElementById('totalFedex').textContent = deliveryStats.fedex;
+        document.getElementById('totalOneCourier').textContent = deliveryStats.oneCourier;
+        document.getElementById('totalGoBolt').textContent = deliveryStats.goBolt;
+        document.getElementById('reportTotalDeliveries').textContent = 
+            deliveryStats.purolator + deliveryStats.fedex + deliveryStats.oneCourier + deliveryStats.goBolt;
+
+        // Update RX statistics display
+        document.getElementById('totalNewRx').textContent = rxStats.newRx;
+        document.getElementById('totalRefills').textContent = rxStats.refill;
+        document.getElementById('totalReAuth').textContent = rxStats.reAuth;
+        document.getElementById('totalHold').textContent = rxStats.hold;
+        document.getElementById('reportTotalProcessed').textContent = rxStats.totalProcessed;
+
+        // Update chart with the processed data
+        await updateChart(data);
     } catch (error) {
         console.error('Error updating report display:', error);
-        showMessage(VALIDATION_MESSAGES.CHART_UPDATE_ERROR + error.message, MESSAGE_TYPES.ERROR);
+        showMessage(VALIDATION_MESSAGES.REPORT_DISPLAY_ERROR + error.message, MESSAGE_TYPES.ERROR);
     }
 }
 
@@ -355,34 +365,60 @@ function updateDeliveryStatistics(data) {
     }
 }
 
-function updateChart(data) {
-    const ctx = document.getElementById(DISPLAY_IDS.REPORT_CHART)?.getContext('2d');
-    if (!ctx) {
-        showMessage(VALIDATION_MESSAGES.CHART_CONTEXT_ERROR, MESSAGE_TYPES.ERROR);
-        return;
-    }
-
+async function updateChart(data) {
     try {
-        if (reportChart) {
-            reportChart.destroy();
-        }
+        console.log('Updating chart with data:', data);
+        
+        const chartData = {
+            labels: [],
+            rxCount: [],
+            deliveries: [],
+            rxPerDelivery: [],
+            services: []
+        };
 
-        reportChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: data.labels,
-                datasets: CHART_CONFIG.DATASETS.map((config, index) => ({
-                    ...config,
-                    data: Object.values(data.datasets)[index],
-                    fill: false,
-                    tension: 0.4
-                }))
-            },
-            options: CHART_CONFIG.OPTIONS
+        // Group data by date to avoid duplicates
+        const groupedData = data.reduce((acc, entry) => {
+            if (!acc[entry.date]) {
+                acc[entry.date] = {
+                    rxCount: 0,
+                    deliveries: 0,
+                    services: 0
+                };
+            }
+            
+            // Sum up the values for each date
+            acc[entry.date].rxCount += (entry.newRx || 0) + (entry.refill || 0) + (entry.reAuth || 0);
+            acc[entry.date].deliveries += (entry.purolator || 0) + (entry.fedex || 0) + 
+                                        (entry.oneCourier || 0) + (entry.goBolt || 0);
+            acc[entry.date].services += entry.serviceCost || 0;
+            
+            return acc;
+        }, {});
+
+        // Convert grouped data to arrays
+        Object.entries(groupedData).forEach(([date, values]) => {
+            chartData.labels.push(new Date(date).toLocaleDateString());
+            chartData.rxCount.push(values.rxCount);
+            chartData.deliveries.push(values.deliveries);
+            chartData.rxPerDelivery.push(
+                values.deliveries > 0 ? values.rxCount / values.deliveries : 0
+            );
+            chartData.services.push(values.services);
         });
+
+        // Update chart data
+        reportChart.data.labels = chartData.labels;
+        reportChart.data.datasets[0].data = chartData.rxCount;
+        reportChart.data.datasets[1].data = chartData.deliveries;
+        reportChart.data.datasets[2].data = chartData.rxPerDelivery;
+        reportChart.data.datasets[3].data = chartData.services;
+
+        reportChart.update();
+        console.log('Chart updated successfully');
     } catch (error) {
-        console.error('Error creating chart:', error);
-        showMessage(VALIDATION_MESSAGES.CHART_CREATE_ERROR + error.message, MESSAGE_TYPES.ERROR);
+        console.error('Error updating chart:', error);
+        showMessage(VALIDATION_MESSAGES.CHART_ERROR + error.message, MESSAGE_TYPES.ERROR);
     }
 }
 
@@ -390,25 +426,67 @@ function updateChart(data) {
  * Chart Initialization
  * --------------------------------------------------------------------- */
 function initializeChart() {
-    const ctx = document.getElementById(DISPLAY_IDS.REPORT_CHART)?.getContext('2d');
-    if (!ctx) {
-        showMessage(VALIDATION_MESSAGES.CHART_CONTEXT_ERROR, MESSAGE_TYPES.ERROR);
-        return;
-    }
+    try {
+        const ctx = document.getElementById('reportChart').getContext('2d');
+        if (!ctx) {
+            console.error('Could not get chart context');
+            return;
+        }
 
-    reportChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: CHART_CONFIG.DATASETS.map(config => ({
-                ...config,
-                data: [],
-                fill: false,
-                tension: 0.4
-            }))
-        },
-        options: CHART_CONFIG.OPTIONS
-    });
+        const chartColors = {
+            RX_COUNT: '#4CAF50',
+            DELIVERIES: '#2196F3',
+            RX_PER_DELIVERY: '#FFC107',
+            SERVICES: '#9C27B0'
+        };
+
+        reportChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'RX Count',
+                        borderColor: chartColors.RX_COUNT,
+                        data: [],
+                        fill: false
+                    },
+                    {
+                        label: 'Deliveries',
+                        borderColor: chartColors.DELIVERIES,
+                        data: [],
+                        fill: false
+                    },
+                    {
+                        label: 'RX per Delivery',
+                        borderColor: chartColors.RX_PER_DELIVERY,
+                        data: [],
+                        fill: false
+                    },
+                    {
+                        label: 'Services Count',
+                        borderColor: chartColors.SERVICES,
+                        data: [],
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        console.log('Chart initialized successfully');
+    } catch (error) {
+        console.error('Error initializing chart:', error);
+        showMessage(VALIDATION_MESSAGES.CHART_ERROR + error.message, MESSAGE_TYPES.ERROR);
+    }
 }
 
 /* ------------------------------------------------------------------------- 

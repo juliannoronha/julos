@@ -47,33 +47,18 @@ export const MESSAGE_TYPES = {
 
 // Chart Configuration
 export const CHART_CONFIG = {
-    DATASETS: [
-        {
-            label: 'RX Count',
-            borderColor: '#2196F3'
-        },
-        {
-            label: 'Deliveries',
-            borderColor: '#4CAF50'
-        },
-        {
-            label: 'RX per Delivery',
-            borderColor: '#FFC107'
-        },
-        {
-            label: 'Services Count',
-            borderColor: '#9C27B0'
-        }
-    ],
+    COLORS: {
+        RX_COUNT: '#4CAF50',
+        DELIVERIES: '#2196F3',
+        RX_PER_DELIVERY: '#FFC107',
+        SERVICES: '#9C27B0'
+    },
     OPTIONS: {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
             y: {
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1
-                }
+                beginAtZero: true
             }
         }
     }
