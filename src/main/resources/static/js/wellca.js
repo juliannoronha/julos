@@ -6,6 +6,14 @@
  * ============================================================================= */
 
 import wellcaApi from './services/wellca-api.js';
+import { 
+    INPUT_FIELDS, 
+    CSS_CLASSES, 
+    DISPLAY_IDS, 
+    DATE_CONFIG,
+    DEFAULT_VALUES,
+    TIME_CONSTANTS
+} from './config/wellcaconstants.js';
 
 let messageContainer;
 let reportChart = null;
@@ -18,33 +26,33 @@ document.addEventListener('DOMContentLoaded', function() {
     setupFormHandlers();
     
     // Fix for date input initialization
-    const dateInput = document.getElementById('date');
+    const dateInput = document.getElementById(INPUT_FIELDS.DATE);
     if (dateInput) {
         // Get today's date and set it at noon to avoid timezone issues
         const today = new Date();
         today.setHours(12, 0, 0, 0);
-        dateInput.value = today.toISOString().split('T')[0];
+        dateInput.value = today.toISOString().split(DATE_CONFIG.ISO_FORMAT)[0];
     }
 
     // Initialize start and end dates for reports
-    const startDateInput = document.getElementById('startDate');
-    const endDateInput = document.getElementById('endDate');
+    const startDateInput = document.getElementById(INPUT_FIELDS.START_DATE);
+    const endDateInput = document.getElementById(INPUT_FIELDS.END_DATE);
     if (startDateInput && endDateInput) {
         const today = new Date();
         today.setHours(12, 0, 0, 0);
-        const formattedDate = today.toISOString().split('T')[0];
+        const formattedDate = today.toISOString().split(DATE_CONFIG.ISO_FORMAT)[0];
         startDateInput.value = formattedDate;
         endDateInput.value = formattedDate;
     }
 
     if (!messageContainer) {
         messageContainer = document.createElement('div');
-        messageContainer.className = 'message-container';
+        messageContainer.className = CSS_CLASSES.MESSAGE_CONTAINER;
         document.body.appendChild(messageContainer);
     }
 
     // Initialize chart when reports tab is shown
-    const reportsTab = document.querySelector('[data-tab="reports"]');
+    const reportsTab = document.querySelector(`[${TAB_CONFIG.DATA_ATTRIBUTE}="${TAB_CONFIG.REPORTS_ID}"]`);
     if (reportsTab) {
         reportsTab.addEventListener('click', function() {
             if (!reportChart) {
@@ -58,8 +66,8 @@ document.addEventListener('DOMContentLoaded', function() {
  * Tab Navigation Functions
  * --------------------------------------------------------------------- */
 function initializeTabs() {
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const tabPanes = document.querySelectorAll('.tab-pane');
+    const tabButtons = document.querySelectorAll(TAB_CONFIG.BUTTON_SELECTOR);
+    const tabPanes = document.querySelectorAll(TAB_CONFIG.PANE_SELECTOR);
     
     // Hide all tabs except the first one
     tabPanes.forEach((pane, index) => {
@@ -72,20 +80,20 @@ function initializeTabs() {
     tabButtons.forEach(button => {
         button.addEventListener('click', (e) => {
             // Remove active class from all buttons and panes
-            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabButtons.forEach(btn => btn.classList.remove(CSS_CLASSES.ACTIVE));
             tabPanes.forEach(pane => pane.style.display = 'none');
 
             // Add active class to clicked button
-            button.classList.add('active');
+            button.classList.add(CSS_CLASSES.ACTIVE);
 
             // Show corresponding pane
-            const tabId = button.getAttribute('data-tab');
+            const tabId = button.getAttribute(TAB_CONFIG.DATA_ATTRIBUTE);
             const pane = document.getElementById(tabId);
             if (pane) {
                 pane.style.display = 'block';
                 
                 // If switching to reports tab, refresh the data
-                if (tabId === 'reports') {
+                if (tabId === TAB_CONFIG.REPORTS_ID) {
                     refreshReportData();
                 }
             }
@@ -111,21 +119,21 @@ function setupFormHandlers() {
 }
 
 function setupDeliveryCalculations() {
-    const deliveryInputs = ['purolator', 'fedex', 'oneCourier', 'goBolt'];
+    const deliveryInputs = INPUT_FIELDS.DELIVERY;
     
     deliveryInputs.forEach(id => {
         document.getElementById(id)?.addEventListener('input', () => {
             const total = deliveryInputs
-                .map(input => parseInt(document.getElementById(input)?.value) || 0)
+                .map(input => parseInt(document.getElementById(input)?.value) || DEFAULT_VALUES.NUMERIC_FIELDS)
                 .reduce((sum, current) => sum + current, 0);
             
-            document.getElementById('totalDeliveries').textContent = total;
+            document.getElementById(DISPLAY_IDS.TOTAL_DELIVERIES).textContent = total;
         });
     });
 }
 
 function setupRxCalculations() {
-    const rxInputs = ['newRx', 'refill', 'reAuth', 'hold'];
+    const rxInputs = INPUT_FIELDS.RX_SALES;
     
     rxInputs.forEach(id => {
         document.getElementById(id)?.addEventListener('input', () => {
@@ -135,40 +143,40 @@ function setupRxCalculations() {
 }
 
 function calculateRxTotals() {
-    const newRx = parseInt(document.getElementById('newRx')?.value) || 0;
-    const refill = parseInt(document.getElementById('refill')?.value) || 0;
-    const reAuth = parseInt(document.getElementById('reAuth')?.value) || 0;
-    const hold = parseInt(document.getElementById('hold')?.value) || 0;
+    const newRx = parseInt(document.getElementById(INPUT_FIELDS.RX_SALES[0])?.value) || DEFAULT_VALUES.NUMERIC_FIELDS;
+    const refill = parseInt(document.getElementById(INPUT_FIELDS.RX_SALES[1])?.value) || DEFAULT_VALUES.NUMERIC_FIELDS;
+    const reAuth = parseInt(document.getElementById(INPUT_FIELDS.RX_SALES[2])?.value) || DEFAULT_VALUES.NUMERIC_FIELDS;
+    const hold = parseInt(document.getElementById(INPUT_FIELDS.RX_SALES[3])?.value) || DEFAULT_VALUES.NUMERIC_FIELDS;
 
     const totalFilled = newRx + refill + reAuth;
     const totalEntered = totalFilled + hold;
 
-    document.getElementById('totalFilled').textContent = totalFilled;
-    document.getElementById('totalEntered').textContent = totalEntered;
+    document.getElementById(DISPLAY_IDS.TOTAL_FILLED).textContent = totalFilled;
+    document.getElementById(DISPLAY_IDS.TOTAL_ENTERED).textContent = totalEntered;
     
-    // Calculate per hour (assuming 8-hour workday)
-    const perHour = (totalEntered / 8).toFixed(2);
-    document.getElementById('totalPerHour').textContent = perHour;
+    // Calculate per hour (using TIME_CONSTANTS.WORK_HOURS_PER_DAY)
+    const perHour = (totalEntered / TIME_CONSTANTS.WORK_HOURS_PER_DAY).toFixed(2);
+    document.getElementById(DISPLAY_IDS.TOTAL_PER_HOUR).textContent = perHour;
 }
 
 function setupProfilesCalculations() {
-    ['profilesEntered', 'whoFilledRx'].forEach(id => {
+    INPUT_FIELDS.PROFILES.forEach(id => {
         document.getElementById(id)?.addEventListener('input', calculateActivePercentage);
     });
 }
 
 function calculateActivePercentage() {
-    const profilesEntered = parseInt(document.getElementById('profilesEntered')?.value) || 0;
-    const whoFilledRx = parseInt(document.getElementById('whoFilledRx')?.value) || 0;
+    const profilesEntered = parseInt(document.getElementById(INPUT_FIELDS.PROFILES[0])?.value) || DEFAULT_VALUES.NUMERIC_FIELDS;
+    const whoFilledRx = parseInt(document.getElementById(INPUT_FIELDS.PROFILES[1])?.value) || DEFAULT_VALUES.NUMERIC_FIELDS;
     
     if (profilesEntered > 0) {
         const percentage = (whoFilledRx / profilesEntered * 100).toFixed(2);
-        document.getElementById('activePercentage').value = percentage;
+        document.getElementById(DISPLAY_IDS.ACTIVE_PERCENTAGE).value = percentage;
     }
 }
 
 function setupServicesForm() {
-    const servicesForm = document.getElementById('servicesForm');
+    const servicesForm = document.getElementById(FORM_IDS.SERVICES);
     if (servicesForm) {
         // Remove any existing event listeners
         const clonedForm = servicesForm.cloneNode(true);
@@ -185,39 +193,37 @@ function setupServicesForm() {
 
             try {
                 // Get form values with enhanced validation
-                const serviceType = document.getElementById('serviceType').value;
-                const serviceCost = parseFloat(document.getElementById('serviceCost').value) || 0;
-                const patientName = document.getElementById('patientName').value;
-                const patientDob = document.getElementById('patientDob').value;
-                const pharmacistName = document.getElementById('pharmacistName').value;
+                const serviceType = document.getElementById(INPUT_FIELDS.SERVICES[0]).value;
+                const serviceCost = parseFloat(document.getElementById(INPUT_FIELDS.SERVICES[1]).value) || DEFAULT_VALUES.SERVICE_COST;
+                const patientName = document.getElementById(INPUT_FIELDS.SERVICES[2]).value;
+                const patientDob = document.getElementById(INPUT_FIELDS.SERVICES[3]).value;
+                const pharmacistName = document.getElementById(INPUT_FIELDS.SERVICES[4]).value;
 
                 if (!serviceType || !serviceCost || !patientName || !patientDob || !pharmacistName) {
                     console.error('Service validation failed: missing required fields');
-                    showMessage('Please fill in all required fields', 'error');
+                    showMessage(VALIDATION_MESSAGES.REQUIRED_FIELDS, MESSAGE_TYPES.ERROR);
                     return;
                 }
 
                 const formData = {
-                    date: document.getElementById('date').value,
+                    date: document.getElementById(INPUT_FIELDS.DATE).value,
                     serviceType: serviceType,
                     serviceCost: serviceCost,
                     patientName: patientName,
                     patientDob: patientDob,
                     pharmacistName: pharmacistName,
-                    // Delivery fields
-                    purolator: 0,
-                    fedex: 0,
-                    oneCourier: 0,
-                    goBolt: 0,
-                    // RX Sales fields
-                    newRx: 0,
-                    refill: 0,
-                    reAuth: 0,
-                    hold: 0,
-                    // Profile fields
-                    profilesEntered: 0,
-                    whoFilledRx: 0,
-                    activePercentage: 0
+                    // Initialize other fields with default values
+                    purolator: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    fedex: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    oneCourier: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    goBolt: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    newRx: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    refill: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    reAuth: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    hold: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    profilesEntered: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    whoFilledRx: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    activePercentage: DEFAULT_VALUES.ACTIVE_PERCENTAGE
                 };
 
                 console.log('Validating Professional Services input:', {
@@ -231,7 +237,7 @@ function setupServicesForm() {
                 const response = await wellcaApi.submitForm(formData);
                 console.log('Professional Services submission response:', response);
 
-                showMessage('Successfully Submitted!');
+                showMessage(VALIDATION_MESSAGES.SUBMISSION_SUCCESS, MESSAGE_TYPES.SUCCESS);
                 clonedForm.reset();
 
                 if (submitButton) {
@@ -244,7 +250,7 @@ function setupServicesForm() {
 
             } catch (error) {
                 console.error('Error submitting Professional Services data:', error);
-                showMessage('Failed to save Professional Services data: ' + error.message, 'error');
+                showMessage(VALIDATION_MESSAGES.SUBMISSION_ERROR + error.message, MESSAGE_TYPES.ERROR);
                 
                 if (submitButton) {
                     submitButton.disabled = false;
@@ -263,39 +269,52 @@ async function handleServiceSubmission(e) {
     e.preventDefault();
     
     const serviceData = {
-        date: document.getElementById('date').value,
-        serviceType: document.getElementById('serviceType').value,
-        serviceCost: parseFloat(document.getElementById('serviceCost').value)
+        date: document.getElementById(INPUT_FIELDS.DATE).value,
+        serviceType: document.getElementById(INPUT_FIELDS.SERVICES[0]).value,
+        serviceCost: parseFloat(document.getElementById(INPUT_FIELDS.SERVICES[1]).value) || DEFAULT_VALUES.SERVICE_COST
     };
 
     try {
         const response = await wellcaApi.submitServiceData(serviceData);
-        showSuccessMessage('Service added successfully');
+        showMessage(VALIDATION_MESSAGES.SERVICE_ADDED, MESSAGE_TYPES.SUCCESS);
         updateServicesList();
     } catch (error) {
-        showErrorMessage('Error: ' + error.message);
+        showMessage(error.message, MESSAGE_TYPES.ERROR);
     }
 }
 
 /* ------------------------------------------------------------------------- 
  * Utility Functions
  * --------------------------------------------------------------------- */
-function showSuccessMessage(message) {
-    const successDiv = document.getElementById('successMessage');
-    if (successDiv) {
-        successDiv.textContent = message;
-        successDiv.style.display = 'block';
-        setTimeout(() => successDiv.style.display = 'none', 3000);
+function showMessage(message, type = MESSAGE_TYPES.SUCCESS) {
+    const messageElement = document.createElement('div');
+    messageElement.className = `${CSS_CLASSES.MESSAGE_BUBBLE} ${type}-bubble ${CSS_CLASSES.SLIDE_IN_FADE}`;
+    messageElement.textContent = message;
+    
+    messageContainer.appendChild(messageElement);
+
+    setTimeout(() => {
+        messageElement.classList.add(CSS_CLASSES.FADE_OUT);
+        setTimeout(() => {
+            messageContainer.removeChild(messageElement);
+        }, TIME_CONSTANTS.ANIMATION_DURATION);
+    }, TIME_CONSTANTS.MESSAGE_DISPLAY_DURATION);
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    try {
+        const date = new Date(`${dateString}${DATE_CONFIG.ISO_FORMAT}`);
+        return date.toLocaleDateString(undefined, DATE_CONFIG.DISPLAY_FORMAT);
+    } catch (error) {
+        console.error('Date formatting error:', error);
+        return 'Invalid Date';
     }
 }
 
-function showErrorMessage(message) {
-    const errorDiv = document.getElementById('errorMessage');
-    if (errorDiv) {
-        errorDiv.textContent = message;
-        errorDiv.style.display = 'block';
-        setTimeout(() => errorDiv.style.display = 'none', 3000);
-    }
+function formatServiceType(type) {
+    return type ? type.replace(/_/g, ' ').toLowerCase()
+        .replace(/\b\w/g, char => char.toUpperCase()) : 'N/A';
 }
 
 /* ------------------------------------------------------------------------- 
@@ -303,11 +322,11 @@ function showErrorMessage(message) {
  * --------------------------------------------------------------------- */
 async function refreshReportData() {
     try {
-        const startDateInput = document.getElementById('startDate');
-        const endDateInput = document.getElementById('endDate');
+        const startDateInput = document.getElementById(INPUT_FIELDS.START_DATE);
+        const endDateInput = document.getElementById(INPUT_FIELDS.END_DATE);
         
         if (!startDateInput.value || !endDateInput.value) {
-            showErrorMessage('Please select both start and end dates');
+            showMessage(VALIDATION_MESSAGES.INVALID_DATE_RANGE, MESSAGE_TYPES.ERROR);
             return;
         }
 
@@ -319,26 +338,26 @@ async function refreshReportData() {
         updateReportDisplay(data);
     } catch (error) {
         console.error('Error refreshing report data:', error);
-        showErrorMessage(`Error loading report: ${error.message}`);
+        showMessage(VALIDATION_MESSAGES.REPORT_ERROR + error.message, MESSAGE_TYPES.ERROR);
     }
 }
 
 // Add date validation function
 function validateDateRange() {
-    const startDateInput = document.getElementById('startDate').value;
-    const endDateInput = document.getElementById('endDate').value;
+    const startDateInput = document.getElementById(INPUT_FIELDS.START_DATE).value;
+    const endDateInput = document.getElementById(INPUT_FIELDS.END_DATE).value;
     
     // Create dates at noon to avoid timezone issues
-    const startDate = new Date(startDateInput + 'T12:00:00');
-    const endDate = new Date(endDateInput + 'T12:00:00');
+    const startDate = new Date(startDateInput + DATE_CONFIG.ISO_FORMAT);
+    const endDate = new Date(endDateInput + DATE_CONFIG.ISO_FORMAT);
     
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        showErrorMessage('Please select valid dates');
+        showMessage(VALIDATION_MESSAGES.INVALID_DATE_RANGE, MESSAGE_TYPES.ERROR);
         return false;
     }
     
     if (endDate < startDate) {
-        showErrorMessage('End date must be after start date');
+        showMessage(VALIDATION_MESSAGES.INVALID_DATE_RANGE, MESSAGE_TYPES.ERROR);
         return false;
     }
     
@@ -359,6 +378,7 @@ async function generateReport() {
         const originalText = generateButton.textContent;
         generateButton.textContent = 'Generating...';
         generateButton.disabled = true;
+        generateButton.classList.add(CSS_CLASSES.LOADING);
 
         // Refresh the report data
         await refreshReportData();
@@ -371,18 +391,20 @@ async function generateReport() {
         // Reset button state
         generateButton.textContent = originalText;
         generateButton.disabled = false;
+        generateButton.classList.remove(CSS_CLASSES.LOADING);
 
         // Show success message
-        showSuccessMessage('Report generated successfully');
+        showMessage(VALIDATION_MESSAGES.SUBMISSION_SUCCESS, MESSAGE_TYPES.SUCCESS);
 
     } catch (error) {
         console.error('Error generating report:', error);
-        showErrorMessage('Failed to generate report: ' + error.message);
+        showMessage(VALIDATION_MESSAGES.REPORT_ERROR + error.message, MESSAGE_TYPES.ERROR);
         
         // Reset button state
         const generateButton = document.querySelector('.generate-button');
         generateButton.textContent = 'Generate Report';
         generateButton.disabled = false;
+        generateButton.classList.remove(CSS_CLASSES.LOADING);
     }
 }
 
@@ -408,7 +430,7 @@ function updateReportDisplay(data) {
             // First pass: Count services for each date
             data.forEach(entry => {
                 if (entry.serviceType) {
-                    const dateKey = new Date(entry.date + 'T12:00:00').toLocaleDateString();
+                    const dateKey = new Date(entry.date + DATE_CONFIG.ISO_FORMAT).toLocaleDateString();
                     serviceCountsByDate.set(dateKey, (serviceCountsByDate.get(dateKey) || 0) + 1);
                 }
             });
@@ -416,23 +438,28 @@ function updateReportDisplay(data) {
             // Second pass: Process all data for chart
             data.forEach(entry => {
                 // Add date label with consistent timezone handling
-                const date = new Date(entry.date + 'T12:00:00');
+                const date = new Date(entry.date + DATE_CONFIG.ISO_FORMAT);
                 const dateKey = date.toLocaleDateString();
                 chartData.labels.push(dateKey);
                 
                 // Calculate totals for each metric
-                const totalRx = (entry.newRx || 0) + (entry.refill || 0) + (entry.reAuth || 0);
-                const totalDeliveries = (entry.purolator || 0) + (entry.fedex || 0) + 
-                                      (entry.oneCourier || 0) + (entry.goBolt || 0);
+                const totalRx = (entry.newRx || DEFAULT_VALUES.NUMERIC_FIELDS) + 
+                               (entry.refill || DEFAULT_VALUES.NUMERIC_FIELDS) + 
+                               (entry.reAuth || DEFAULT_VALUES.NUMERIC_FIELDS);
+                               
+                const totalDeliveries = (entry.purolator || DEFAULT_VALUES.NUMERIC_FIELDS) + 
+                                      (entry.fedex || DEFAULT_VALUES.NUMERIC_FIELDS) + 
+                                      (entry.oneCourier || DEFAULT_VALUES.NUMERIC_FIELDS) + 
+                                      (entry.goBolt || DEFAULT_VALUES.NUMERIC_FIELDS);
                 
                 // Get actual service count for this date
-                const servicesCount = serviceCountsByDate.get(dateKey) || 0;
+                const servicesCount = serviceCountsByDate.get(dateKey) || DEFAULT_VALUES.NUMERIC_FIELDS;
                 
                 // Add data points
                 chartData.datasets.rxCount.push(totalRx);
                 chartData.datasets.deliveries.push(totalDeliveries);
                 chartData.datasets.rxPerDelivery.push(
-                    totalDeliveries > 0 ? totalRx / totalDeliveries : 0
+                    totalDeliveries > 0 ? totalRx / totalDeliveries : DEFAULT_VALUES.NUMERIC_FIELDS
                 );
                 chartData.datasets.services.push(servicesCount);
             });
@@ -446,10 +473,10 @@ function updateReportDisplay(data) {
             let totalPurolator = 0, totalFedex = 0, totalOneCourier = 0, totalGoBolt = 0;
             
             data.forEach(entry => {
-                totalPurolator += entry.purolator || 0;
-                totalFedex += entry.fedex || 0;
-                totalOneCourier += entry.oneCourier || 0;
-                totalGoBolt += entry.goBolt || 0;
+                totalPurolator += entry.purolator || DEFAULT_VALUES.NUMERIC_FIELDS;
+                totalFedex += entry.fedex || DEFAULT_VALUES.NUMERIC_FIELDS;
+                totalOneCourier += entry.oneCourier || DEFAULT_VALUES.NUMERIC_FIELDS;
+                totalGoBolt += entry.goBolt || DEFAULT_VALUES.NUMERIC_FIELDS;
             });
 
             const deliveryElements = {
@@ -468,144 +495,6 @@ function updateReportDisplay(data) {
             });
         }
 
-        // Update RX Sales Statistics
-        if (data.length > 0) {
-            let totalNewRx = 0, totalRefills = 0, totalReAuth = 0, totalHold = 0;
-            
-            data.forEach(entry => {
-                totalNewRx += entry.newRx || 0;
-                totalRefills += entry.refill || 0;
-                totalReAuth += entry.reAuth || 0;
-                totalHold += entry.hold || 0;
-            });
-
-            const rxElements = {
-                'totalNewRx': totalNewRx,
-                'totalRefills': totalRefills,
-                'totalReAuth': totalReAuth,
-                'totalHold': totalHold,
-                'reportTotalProcessed': totalNewRx + totalRefills + totalReAuth
-            };
-
-            Object.entries(rxElements).forEach(([id, value]) => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.textContent = value;
-                }
-            });
-        }
-
-        // Update Professional Services Summary
-        if (data.length > 0) {
-            console.log('Processing Professional Services data...');
-            
-            // Group services by month
-            const monthlyServices = new Map();
-            let grandTotal = 0;
-
-            data.forEach(entry => {
-                if (entry.serviceType && entry.serviceCost) {
-                    // Add T12:00:00 to ensure consistent date handling
-                    const date = new Date(entry.date + 'T12:00:00');
-                    const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-                    
-                    if (!monthlyServices.has(monthKey)) {
-                        monthlyServices.set(monthKey, new Map());
-                    }
-                    
-                    const monthData = monthlyServices.get(monthKey);
-                    if (!monthData.has(entry.serviceType)) {
-                        monthData.set(entry.serviceType, []);
-                    }
-                    
-                    monthData.get(entry.serviceType).push(entry);
-                    grandTotal += parseFloat(entry.serviceCost);
-                }
-            });
-
-            // Update the service breakdown display
-            const serviceBreakdown = document.getElementById('serviceBreakdown');
-            if (serviceBreakdown) {
-                let html = '';
-                
-                monthlyServices.forEach((services, monthKey) => {
-                    const [year, month] = monthKey.split('-');
-                    // Create date with time to ensure consistent handling
-                    const date = new Date(`${year}-${month}-01T12:00:00`);
-                    const monthName = date.toLocaleString('default', { month: 'long' });
-                    const yearNum = date.getFullYear();
-                    
-                    html += `<div class="month-section">
-                        <h5>${monthName} ${yearNum}</h5>`;
-                    
-                    services.forEach((entries, serviceType) => {
-                        const totalCost = entries.reduce((sum, entry) => 
-                            sum + (parseFloat(entry.serviceCost) || 0), 0);
-                        
-                        html += `
-                            <div class="service-type-row" data-service-type="${serviceType}">
-                                <div class="service-summary">
-                                    ${formatServiceType(serviceType)}: ${entries.length} - Total: $${totalCost.toFixed(2)}
-                                </div>
-                                <div class="service-details">
-                                    ${entries.map(entry => `
-                                        <div class="detail-item">
-                                            <div>
-                                                <span class="detail-label">Patient:</span>
-                                                <span class="detail-value">${entry.patientName || 'N/A'}</span>
-                                            </div>
-                                            <div>
-                                                <span class="detail-label">DOB:</span>
-                                                <span class="detail-value">${formatDate(entry.patientDob)}</span>
-                                            </div>
-                                            <div>
-                                                <span class="detail-label">Pharmacist:</span>
-                                                <span class="detail-value">${entry.pharmacistName || 'N/A'}</span>
-                                            </div>
-                                            <div>
-                                                <span class="detail-label">Date:</span>
-                                                <span class="detail-value">${formatDate(entry.date)}</span>
-                                            </div>
-                                            <div>
-                                                <span class="detail-label">Cost:</span>
-                                                <span class="detail-value">$${parseFloat(entry.serviceCost).toFixed(2)}</span>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>`;
-                    });
-                    
-                    html += '</div>';
-                });
-                
-                serviceBreakdown.innerHTML = html;
-
-                // Update total services cost
-                const totalServicesElement = document.getElementById('totalServices');
-                if (totalServicesElement) {
-                    totalServicesElement.textContent = grandTotal.toFixed(2);
-                }
-
-                // Add click handlers
-                document.querySelectorAll('.service-type-row').forEach(row => {
-                    row.addEventListener('click', function(e) {
-                        const details = this.querySelector('.service-details');
-                        if (details && !details.contains(e.target)) {
-                            details.classList.toggle('active');
-                            
-                            // Close other open details
-                            document.querySelectorAll('.service-details.active').forEach(detail => {
-                                if (detail !== details) {
-                                    detail.classList.remove('active');
-                                }
-                            });
-                        }
-                    });
-                });
-            }
-        }
-
         // Make report sections visible
         document.querySelectorAll('.report-section').forEach(section => {
             section.style.display = 'block';
@@ -613,489 +502,42 @@ function updateReportDisplay(data) {
 
     } catch (error) {
         console.error('Error updating report display:', error);
-        showErrorMessage('Error updating report display: ' + error.message);
+        showMessage(VALIDATION_MESSAGES.REPORT_ERROR + error.message, MESSAGE_TYPES.ERROR);
     }
-}
-
-// Helper function to format month-year
-function formatMonthYear(monthKey) {
-    const [year, month] = monthKey.split('-');
-    const date = new Date(year, parseInt(month) - 1);
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-}
-
-// Helper function to format service type
-function formatServiceType(type) {
-    if (!type) return 'Unknown';
-    return type.split('_').map(word => 
-        word.charAt(0) + word.slice(1).toLowerCase()
-    ).join(' ');
-}
-
-function setupDeliveryForm() {
-    const deliveryForm = document.getElementById('deliveryForm');
-    if (deliveryForm) {
-        deliveryForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const submitButton = e.target.querySelector('button[type="submit"]');
-            if (submitButton) {
-                submitButton.disabled = true;
-                submitButton.classList.add('loading');
-            }
-
-            try {
-                console.log('Submitting delivery form...');
-
-                const formData = {
-                    date: document.getElementById('date').value,
-                    // Delivery data
-                    purolator: parseInt(document.getElementById('purolator').value) || 0,
-                    fedex: parseInt(document.getElementById('fedex').value) || 0,
-                    oneCourier: parseInt(document.getElementById('oneCourier').value) || 0,
-                    goBolt: parseInt(document.getElementById('goBolt').value) || 0,
-                    // Initialize other fields to 0 or null
-                    newRx: 0,
-                    refill: 0,
-                    reAuth: 0,
-                    hold: 0,
-                    profilesEntered: 0,
-                    whoFilledRx: 0,
-                    activePercentage: 0,
-                    serviceType: null,
-                    serviceCost: 0
-                };
-
-                const response = await wellcaApi.submitForm(formData);
-                console.log('Delivery submission response:', response);
-                showMessage('Successfully Submitted!');
-
-                // Reset the form after successful submission
-                deliveryForm.reset();
-
-                if (submitButton) {
-                    submitButton.disabled = false;
-                    submitButton.classList.remove('loading');
-                }
-            } catch (error) {
-                console.error('Error submitting delivery data:', error);
-                showMessage('Failed to save delivery data: ' + error.message, 'error');
-                
-                if (submitButton) {
-                    submitButton.disabled = false;
-                    submitButton.classList.remove('loading');
-                }
-            }
-        });
-    } else {
-        console.error('Delivery form not found in DOM');
-    }
-}
-
-function setupRxSalesForm() {
-    const rxSalesForm = document.getElementById('rxSalesForm');
-    if (rxSalesForm) {
-        const clonedForm = rxSalesForm.cloneNode(true);
-        rxSalesForm.parentNode.replaceChild(clonedForm, rxSalesForm);
-        
-        clonedForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const submitButton = clonedForm.querySelector('button[type="submit"]');
-            if (submitButton) {
-                submitButton.disabled = true;
-            }
-
-            try {
-                const formData = {
-                    date: document.getElementById('date').value,
-                    newRx: parseInt(document.getElementById('newRx').value) || 0,
-                    refill: parseInt(document.getElementById('refill').value) || 0,
-                    reAuth: parseInt(document.getElementById('reAuth').value) || 0,
-                    hold: parseInt(document.getElementById('hold').value) || 0,
-                    // Other fields initialized to 0
-                    purolator: 0,
-                    fedex: 0,
-                    oneCourier: 0,
-                    goBolt: 0,
-                    profilesEntered: 0,
-                    whoFilledRx: 0,
-                    activePercentage: 0,
-                    serviceType: null,
-                    serviceCost: 0
-                };
-
-                const response = await wellcaApi.submitForm(formData);
-                showSuccessMessage('Successfully submitted!');
-                
-                // Update totals display
-                calculateRxTotals();
-                clonedForm.reset();
-                
-            } catch (error) {
-                showErrorMessage('Failed to save RX Sales data: ' + error.message);
-            } finally {
-                if (submitButton) {
-                    submitButton.disabled = false;
-                }
-            }
-        });
-    }
-}
-
-function setupProfilesForm() {
-    const profilesForm = document.getElementById('profilesForm');
-    if (profilesForm) {
-        // Remove any existing event listeners
-        const clonedForm = profilesForm.cloneNode(true);
-        profilesForm.parentNode.replaceChild(clonedForm, profilesForm);
-        
-        clonedForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const submitButton = clonedForm.querySelector('button[type="submit"]');
-            if (submitButton) {
-                submitButton.disabled = true;
-            }
-
-            console.log('Submitting Weekly Profiles form...');
-
-            // Validate inputs
-            const profilesEntered = parseInt(document.getElementById('profilesEntered').value) || 0;
-            const whoFilledRx = parseInt(document.getElementById('whoFilledRx').value) || 0;
-            let activePercentage = parseFloat(document.getElementById('activePercentage').value) || 0;
-
-            // Calculate active percentage if not manually entered
-            if (activePercentage === 0 && profilesEntered > 0) {
-                activePercentage = (whoFilledRx / profilesEntered) * 100;
-            }
-
-            const formData = {
-                date: document.getElementById('date').value,
-                // Weekly Profiles data
-                profilesEntered: profilesEntered,
-                whoFilledRx: whoFilledRx,
-                activePercentage: activePercentage,
-                // Initialize other fields to 0
-                purolator: 0,
-                fedex: 0,
-                oneCourier: 0,
-                goBolt: 0,
-                newRx: 0,
-                refill: 0,
-                reAuth: 0,
-                hold: 0,
-                serviceType: null,
-                serviceCost: 0
-            };
-
-            console.log('Weekly Profiles form data:', formData);
-
-            try {
-                const response = await wellcaApi.submitForm(formData);
-                console.log('Weekly Profiles submission response:', response);
-                showMessage('Successfully Submitted!');
-
-                // Update weekly summary
-                if (document.getElementById('weeklyTotalProfiles')) {
-                    document.getElementById('weeklyTotalProfiles').textContent = profilesEntered;
-                }
-                if (document.getElementById('weeklyAverageActive')) {
-                    document.getElementById('weeklyAverageActive').textContent = 
-                        `${activePercentage.toFixed(2)}%`;
-                }
-
-                // Reset the form after successful submission
-                clonedForm.reset();
-
-                if (submitButton) {
-                    submitButton.disabled = false;
-                }
-
-            } catch (error) {
-                console.error('Error submitting Weekly Profiles data:', error);
-                showMessage('Failed to save Weekly Profiles data: ' + error.message, 'error');
-            }
-        });
-    } else {
-        console.error('Profiles form not found in DOM');
-    }
-}
-
-function showMessage(message, type = 'success') {
-    const messageContainer = document.querySelector('.message-container');
-    const messageElement = document.createElement('div');
-    messageElement.className = `message-bubble ${type}-bubble`;
-    messageElement.textContent = message;
-
-    // Add animation class
-    messageElement.classList.add('slide-in-fade');
-    
-    messageContainer.appendChild(messageElement);
-
-    // Remove the message after animation completes
-    setTimeout(() => {
-        messageElement.classList.add('fade-out');
-        setTimeout(() => {
-            messageContainer.removeChild(messageElement);
-        }, 300); // Match the fade-out animation duration
-    }, 3000);
-}
-
-function updateServiceBreakdown(data) {
-    const serviceBreakdown = document.getElementById('serviceBreakdown');
-    if (!serviceBreakdown) return;
-
-    // Group services by type
-    const servicesByType = new Map();
-    data.forEach(entry => {
-        if (!servicesByType.has(entry.serviceType)) {
-            servicesByType.set(entry.serviceType, []);
-        }
-        servicesByType.get(entry.serviceType).push(entry);
-    });
-
-    // Generate HTML for each service type
-    servicesByType.forEach((services, type) => {
-        const row = document.createElement('div');
-        row.className = 'service-type-row';
-        row.innerHTML = `
-            ${type}: ${services.length}
-            <div class="service-details">
-                ${services.map(service => `
-                    <div class="detail-item">
-                        <div class="detail-label">Patient:</div>
-                        <div class="detail-value">${service.patientName || 'N/A'}</div>
-                        <div class="detail-label">Date:</div>
-                        <div class="detail-value">${formatDate(service.date)}</div>
-                        <div class="detail-label">Cost:</div>
-                        <div class="detail-value">$${service.serviceCost.toFixed(2)}</div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-
-        // Add click handler
-        row.addEventListener('click', function(e) {
-            const details = this.querySelector('.service-details');
-            if (details) {
-                // Toggle only if click is on the row itself, not the details
-                if (!details.contains(e.target)) {
-                    details.classList.toggle('active');
-                    
-                    // Close other open details
-                    document.querySelectorAll('.service-details.active').forEach(detail => {
-                        if (detail !== details) {
-                            detail.classList.remove('active');
-                        }
-                    });
-                }
-            }
-        });
-
-        serviceBreakdown.appendChild(row);
-    });
-}
-
-// Helper function to format dates
-function formatDate(dateString) {
-    if (!dateString) return 'N/A';
-    try {
-        // Use consistent timezone handling
-        const date = new Date(dateString + 'T12:00:00');
-        return date.toLocaleDateString();
-    } catch (error) {
-        console.error('Error formatting date:', error);
-        return 'Invalid Date';
-    }
-}
-// Update the service breakdown rendering
-function renderServiceBreakdown(data) {
-    console.log('=== Render Service Breakdown ===');
-    console.log('Data received for rendering:', data);
-
-    // Filter out entries that have serviceType (Professional Services only)
-    const serviceEntries = data.filter(entry => entry.serviceType !== null);
-    console.log('Filtered service entries:', serviceEntries);
-
-    // Group by month
-    const monthlyServices = new Map();
-    
-    serviceEntries.forEach(entry => {
-        const date = new Date(entry.date + 'T12:00:00');
-        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        
-        if (!monthlyServices.has(monthKey)) {
-            monthlyServices.set(monthKey, new Map());
-        }
-        
-        const monthData = monthlyServices.get(monthKey);
-        if (!monthData.has(entry.serviceType)) {
-            monthData.set(entry.serviceType, []);
-        }
-        
-        monthData.get(entry.serviceType).push(entry);
-    });
-
-    // Update the display
-    const serviceBreakdown = document.getElementById('serviceBreakdown');
-    if (serviceBreakdown) {
-        let html = '';
-        let grandTotal = 0;
-        
-        monthlyServices.forEach((services, monthKey) => {
-            const [year, month] = monthKey.split('-');
-            const date = new Date(`${year}-${month}-01T12:00:00`);
-            const monthName = date.toLocaleString('default', { month: 'long' });
-            
-            html += `<div class="month-section">
-                <h5>${monthName} ${year}</h5>`;
-            
-            services.forEach((entries, serviceType) => {
-                const totalCost = entries.reduce((sum, entry) => 
-                    sum + (parseFloat(entry.serviceCost) || 0), 0);
-                grandTotal += totalCost;
-                
-                html += `
-                    <div class="service-type-row" data-service-type="${serviceType}">
-                        <div class="service-summary">
-                            ${formatServiceType(serviceType)}: ${entries.length} - Total: $${totalCost.toFixed(2)}
-                        </div>
-                        <div class="service-details">
-                            ${entries.map(entry => `
-                                <div class="detail-item">
-                                    <div>
-                                        <span class="detail-label">Patient:</span>
-                                        <span class="detail-value">${entry.patientName || 'N/A'}</span>
-                                    </div>
-                                    <div>
-                                        <span class="detail-label">DOB:</span>
-                                        <span class="detail-value">${formatDate(entry.patientDob)}</span>
-                                    </div>
-                                    <div>
-                                        <span class="detail-label">Pharmacist:</span>
-                                        <span class="detail-value">${entry.pharmacistName || 'N/A'}</span>
-                                    </div>
-                                    <div>
-                                        <span class="detail-label">Date:</span>
-                                        <span class="detail-value">${formatDate(entry.date)}</span>
-                                    </div>
-                                    <div>
-                                        <span class="detail-label">Cost:</span>
-                                        <span class="detail-value">$${parseFloat(entry.serviceCost).toFixed(2)}</span>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>`;
-            });
-            
-            html += '</div>';
-        });
-        
-        serviceBreakdown.innerHTML = html;
-
-        // Update total services cost
-        const totalServicesElement = document.getElementById('totalServices');
-        if (totalServicesElement) {
-            totalServicesElement.textContent = grandTotal.toFixed(2);
-        }
-
-        // Add click handlers for expanding/collapsing details
-        document.querySelectorAll('.service-type-row').forEach(row => {
-            row.addEventListener('click', function(e) {
-                const details = this.querySelector('.service-details');
-                if (details && !details.contains(e.target)) {
-                    details.classList.toggle('active');
-                    
-                    // Close other open details
-                    document.querySelectorAll('.service-details.active').forEach(detail => {
-                        if (detail !== details) {
-                            detail.classList.remove('active');
-                        }
-                    });
-                }
-            });
-        });
-    }
-}
-
-function initializeChart() {
-    const ctx = document.getElementById('reportChart').getContext('2d');
-    reportChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [
-                {
-                    label: 'RX Count',
-                    borderColor: '#2196F3',
-                    data: []
-                },
-                {
-                    label: 'Deliveries',
-                    borderColor: '#4CAF50',
-                    data: []
-                },
-                {
-                    label: 'RX per Delivery',
-                    borderColor: '#FFC107',
-                    data: []
-                },
-                {
-                    label: 'Services Count',
-                    borderColor: '#9C27B0',
-                    data: []
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
-                    }
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.dataset.label || '';
-                            if (label) {
-                                label += ': ';
-                            }
-                            if (context.parsed.y !== null) {
-                                if (label.includes('Services')) {
-                                    label += Math.round(context.parsed.y);
-                                } else {
-                                    label += context.parsed.y.toFixed(2);
-                                }
-                            }
-                            return label;
-                        }
-                    }
-                }
-            }
-        }
-    });
 }
 
 function updateChart(data) {
-    if (!reportChart) {
-        initializeChart();
+    const ctx = document.getElementById(DISPLAY_IDS.REPORT_CHART)?.getContext('2d');
+    if (!ctx) return;
+
+    if (reportChart) {
+        reportChart.destroy();
     }
 
-    reportChart.data.labels = data.labels;
-    reportChart.data.datasets[0].data = data.datasets.rxCount;
-    reportChart.data.datasets[1].data = data.datasets.deliveries;
-    reportChart.data.datasets[2].data = data.datasets.rxPerDelivery;
-    reportChart.data.datasets[3].data = data.datasets.services;
-    
-    reportChart.update();
+    reportChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.labels,
+            datasets: CHART_CONFIG.DATASETS.map((config, index) => ({
+                ...config,
+                data: Object.values(data.datasets)[index],
+                fill: false,
+                tension: 0.4
+            }))
+        },
+        options: CHART_CONFIG.OPTIONS
+    });
 }
+
+// Export any functions that might be needed by other modules
+export {
+    initializeTabs,
+    setupFormHandlers,
+    refreshReportData,
+    generateReport,
+    showMessage,
+    formatDate,
+    formatServiceType,
+    updateReportDisplay,
+    updateChart
+};
