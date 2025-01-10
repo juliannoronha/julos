@@ -12,18 +12,22 @@ import {
     DISPLAY_IDS, 
     DATE_CONFIG,
     DEFAULT_VALUES,
-    TIME_CONSTANTS
+    TIME_CONSTANTS,
+    TAB_CONFIG,
+    MESSAGE_TYPES,
+    VALIDATION_MESSAGES
 } from './config/wellcaconstants.js';
+import { setupFormHandlers } from './core/wellcaformhandler.js';
 
 let messageContainer;
 let reportChart = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-    setupDeliveryForm();
-    setupRxSalesForm();
-    setupServicesForm();
-    initializeTabs();
+    // Initialize form handlers from the new module
     setupFormHandlers();
+    
+    // Initialize tabs
+    initializeTabs();
     
     // Fix for date input initialization
     const dateInput = document.getElementById(INPUT_FIELDS.DATE);
@@ -99,167 +103,6 @@ function initializeTabs() {
             }
         });
     });
-}
-
-/* ------------------------------------------------------------------------- 
- * Form Setup and Handlers
- * --------------------------------------------------------------------- */
-function setupFormHandlers() {
-    // Setup delivery form calculations
-    setupDeliveryCalculations();
-    
-    // Setup RX sales calculations
-    setupRxCalculations();
-    
-    // Setup profiles calculations
-    setupProfilesCalculations();
-    
-    // Setup services form
-    setupServicesForm();
-}
-
-function setupDeliveryCalculations() {
-    const deliveryInputs = INPUT_FIELDS.DELIVERY;
-    
-    deliveryInputs.forEach(id => {
-        document.getElementById(id)?.addEventListener('input', () => {
-            const total = deliveryInputs
-                .map(input => parseInt(document.getElementById(input)?.value) || DEFAULT_VALUES.NUMERIC_FIELDS)
-                .reduce((sum, current) => sum + current, 0);
-            
-            document.getElementById(DISPLAY_IDS.TOTAL_DELIVERIES).textContent = total;
-        });
-    });
-}
-
-function setupRxCalculations() {
-    const rxInputs = INPUT_FIELDS.RX_SALES;
-    
-    rxInputs.forEach(id => {
-        document.getElementById(id)?.addEventListener('input', () => {
-            calculateRxTotals();
-        });
-    });
-}
-
-function calculateRxTotals() {
-    const newRx = parseInt(document.getElementById(INPUT_FIELDS.RX_SALES[0])?.value) || DEFAULT_VALUES.NUMERIC_FIELDS;
-    const refill = parseInt(document.getElementById(INPUT_FIELDS.RX_SALES[1])?.value) || DEFAULT_VALUES.NUMERIC_FIELDS;
-    const reAuth = parseInt(document.getElementById(INPUT_FIELDS.RX_SALES[2])?.value) || DEFAULT_VALUES.NUMERIC_FIELDS;
-    const hold = parseInt(document.getElementById(INPUT_FIELDS.RX_SALES[3])?.value) || DEFAULT_VALUES.NUMERIC_FIELDS;
-
-    const totalFilled = newRx + refill + reAuth;
-    const totalEntered = totalFilled + hold;
-
-    document.getElementById(DISPLAY_IDS.TOTAL_FILLED).textContent = totalFilled;
-    document.getElementById(DISPLAY_IDS.TOTAL_ENTERED).textContent = totalEntered;
-    
-    // Calculate per hour (using TIME_CONSTANTS.WORK_HOURS_PER_DAY)
-    const perHour = (totalEntered / TIME_CONSTANTS.WORK_HOURS_PER_DAY).toFixed(2);
-    document.getElementById(DISPLAY_IDS.TOTAL_PER_HOUR).textContent = perHour;
-}
-
-function setupProfilesCalculations() {
-    INPUT_FIELDS.PROFILES.forEach(id => {
-        document.getElementById(id)?.addEventListener('input', calculateActivePercentage);
-    });
-}
-
-function calculateActivePercentage() {
-    const profilesEntered = parseInt(document.getElementById(INPUT_FIELDS.PROFILES[0])?.value) || DEFAULT_VALUES.NUMERIC_FIELDS;
-    const whoFilledRx = parseInt(document.getElementById(INPUT_FIELDS.PROFILES[1])?.value) || DEFAULT_VALUES.NUMERIC_FIELDS;
-    
-    if (profilesEntered > 0) {
-        const percentage = (whoFilledRx / profilesEntered * 100).toFixed(2);
-        document.getElementById(DISPLAY_IDS.ACTIVE_PERCENTAGE).value = percentage;
-    }
-}
-
-function setupServicesForm() {
-    const servicesForm = document.getElementById(FORM_IDS.SERVICES);
-    if (servicesForm) {
-        // Remove any existing event listeners
-        const clonedForm = servicesForm.cloneNode(true);
-        servicesForm.parentNode.replaceChild(clonedForm, servicesForm);
-        
-        clonedForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const submitButton = clonedForm.querySelector('button[type="submit"]');
-            if (submitButton) {
-                submitButton.disabled = true;
-            }
-
-            try {
-                // Get form values with enhanced validation
-                const serviceType = document.getElementById(INPUT_FIELDS.SERVICES[0]).value;
-                const serviceCost = parseFloat(document.getElementById(INPUT_FIELDS.SERVICES[1]).value) || DEFAULT_VALUES.SERVICE_COST;
-                const patientName = document.getElementById(INPUT_FIELDS.SERVICES[2]).value;
-                const patientDob = document.getElementById(INPUT_FIELDS.SERVICES[3]).value;
-                const pharmacistName = document.getElementById(INPUT_FIELDS.SERVICES[4]).value;
-
-                if (!serviceType || !serviceCost || !patientName || !patientDob || !pharmacistName) {
-                    console.error('Service validation failed: missing required fields');
-                    showMessage(VALIDATION_MESSAGES.REQUIRED_FIELDS, MESSAGE_TYPES.ERROR);
-                    return;
-                }
-
-                const formData = {
-                    date: document.getElementById(INPUT_FIELDS.DATE).value,
-                    serviceType: serviceType,
-                    serviceCost: serviceCost,
-                    patientName: patientName,
-                    patientDob: patientDob,
-                    pharmacistName: pharmacistName,
-                    // Initialize other fields with default values
-                    purolator: DEFAULT_VALUES.NUMERIC_FIELDS,
-                    fedex: DEFAULT_VALUES.NUMERIC_FIELDS,
-                    oneCourier: DEFAULT_VALUES.NUMERIC_FIELDS,
-                    goBolt: DEFAULT_VALUES.NUMERIC_FIELDS,
-                    newRx: DEFAULT_VALUES.NUMERIC_FIELDS,
-                    refill: DEFAULT_VALUES.NUMERIC_FIELDS,
-                    reAuth: DEFAULT_VALUES.NUMERIC_FIELDS,
-                    hold: DEFAULT_VALUES.NUMERIC_FIELDS,
-                    profilesEntered: DEFAULT_VALUES.NUMERIC_FIELDS,
-                    whoFilledRx: DEFAULT_VALUES.NUMERIC_FIELDS,
-                    activePercentage: DEFAULT_VALUES.ACTIVE_PERCENTAGE
-                };
-
-                console.log('Validating Professional Services input:', {
-                    serviceType,
-                    serviceCost,
-                    patientName,
-                    patientDob,
-                    pharmacistName
-                });
-
-                const response = await wellcaApi.submitForm(formData);
-                console.log('Professional Services submission response:', response);
-
-                showMessage(VALIDATION_MESSAGES.SUBMISSION_SUCCESS, MESSAGE_TYPES.SUCCESS);
-                clonedForm.reset();
-
-                if (submitButton) {
-                    submitButton.disabled = false;
-                }
-
-                // Refresh the report data
-                await refreshReportData();
-                generateReport();
-
-            } catch (error) {
-                console.error('Error submitting Professional Services data:', error);
-                showMessage(VALIDATION_MESSAGES.SUBMISSION_ERROR + error.message, MESSAGE_TYPES.ERROR);
-                
-                if (submitButton) {
-                    submitButton.disabled = false;
-                }
-            }
-        });
-    } else {
-        console.error('Services form not found in DOM');
-    }
 }
 
 /* ------------------------------------------------------------------------- 
@@ -408,7 +251,9 @@ async function generateReport() {
     }
 }
 
-// Helper function to update the report display with the fetched data
+/* ------------------------------------------------------------------------- 
+ * Chart and Display Functions
+ * --------------------------------------------------------------------- */
 function updateReportDisplay(data) {
     try {
         // Prepare chart data
@@ -422,7 +267,6 @@ function updateReportDisplay(data) {
             }
         };
 
-        // Process data for chart
         if (data.length > 0) {
             // Create a map to store service counts by date
             const serviceCountsByDate = new Map();
@@ -437,7 +281,6 @@ function updateReportDisplay(data) {
 
             // Second pass: Process all data for chart
             data.forEach(entry => {
-                // Add date label with consistent timezone handling
                 const date = new Date(entry.date + DATE_CONFIG.ISO_FORMAT);
                 const dateKey = date.toLocaleDateString();
                 chartData.labels.push(dateKey);
@@ -452,10 +295,8 @@ function updateReportDisplay(data) {
                                       (entry.oneCourier || DEFAULT_VALUES.NUMERIC_FIELDS) + 
                                       (entry.goBolt || DEFAULT_VALUES.NUMERIC_FIELDS);
                 
-                // Get actual service count for this date
                 const servicesCount = serviceCountsByDate.get(dateKey) || DEFAULT_VALUES.NUMERIC_FIELDS;
                 
-                // Add data points
                 chartData.datasets.rxCount.push(totalRx);
                 chartData.datasets.deliveries.push(totalDeliveries);
                 chartData.datasets.rxPerDelivery.push(
@@ -465,44 +306,45 @@ function updateReportDisplay(data) {
             });
         }
 
-        // Update the chart
         updateChart(chartData);
-
-        // Update Delivery Statistics
-        if (data.length > 0) {
-            let totalPurolator = 0, totalFedex = 0, totalOneCourier = 0, totalGoBolt = 0;
-            
-            data.forEach(entry => {
-                totalPurolator += entry.purolator || DEFAULT_VALUES.NUMERIC_FIELDS;
-                totalFedex += entry.fedex || DEFAULT_VALUES.NUMERIC_FIELDS;
-                totalOneCourier += entry.oneCourier || DEFAULT_VALUES.NUMERIC_FIELDS;
-                totalGoBolt += entry.goBolt || DEFAULT_VALUES.NUMERIC_FIELDS;
-            });
-
-            const deliveryElements = {
-                'totalPurolator': totalPurolator,
-                'totalFedex': totalFedex,
-                'totalOneCourier': totalOneCourier,
-                'totalGoBolt': totalGoBolt,
-                'reportTotalDeliveries': totalPurolator + totalFedex + totalOneCourier + totalGoBolt
-            };
-
-            Object.entries(deliveryElements).forEach(([id, value]) => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.textContent = value;
-                }
-            });
-        }
-
-        // Make report sections visible
-        document.querySelectorAll('.report-section').forEach(section => {
-            section.style.display = 'block';
-        });
+        updateDeliveryStatistics(data);
 
     } catch (error) {
         console.error('Error updating report display:', error);
         showMessage(VALIDATION_MESSAGES.REPORT_ERROR + error.message, MESSAGE_TYPES.ERROR);
+    }
+}
+
+function updateDeliveryStatistics(data) {
+    if (data.length > 0) {
+        const totals = {
+            purolator: 0,
+            fedex: 0,
+            oneCourier: 0,
+            goBolt: 0
+        };
+        
+        data.forEach(entry => {
+            totals.purolator += entry.purolator || DEFAULT_VALUES.NUMERIC_FIELDS;
+            totals.fedex += entry.fedex || DEFAULT_VALUES.NUMERIC_FIELDS;
+            totals.oneCourier += entry.oneCourier || DEFAULT_VALUES.NUMERIC_FIELDS;
+            totals.goBolt += entry.goBolt || DEFAULT_VALUES.NUMERIC_FIELDS;
+        });
+
+        const deliveryElements = {
+            'totalPurolator': totals.purolator,
+            'totalFedex': totals.fedex,
+            'totalOneCourier': totals.oneCourier,
+            'totalGoBolt': totals.goBolt,
+            'reportTotalDeliveries': Object.values(totals).reduce((a, b) => a + b, 0)
+        };
+
+        Object.entries(deliveryElements).forEach(([id, value]) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+            }
+        });
     }
 }
 
@@ -529,15 +371,25 @@ function updateChart(data) {
     });
 }
 
-// Export any functions that might be needed by other modules
+/* ------------------------------------------------------------------------- 
+ * Exports
+ * --------------------------------------------------------------------- */
 export {
+    // Core UI Functions
     initializeTabs,
-    setupFormHandlers,
+    showMessage,
+    
+    // Report Functions
     refreshReportData,
     generateReport,
-    showMessage,
-    formatDate,
-    formatServiceType,
+    validateDateRange,
+    
+    // Chart Functions
     updateReportDisplay,
-    updateChart
+    updateChart,
+    updateDeliveryStatistics,
+    
+    // Utility Functions
+    formatDate,
+    formatServiceType
 };
