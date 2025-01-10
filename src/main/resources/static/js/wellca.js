@@ -5,6 +5,8 @@
  * for the Wellca management system
  * ============================================================================= */
 
+import wellcaApi from './services/wellca-api.js';
+
 let messageContainer;
 let reportChart = null;
 
@@ -226,7 +228,7 @@ function setupServicesForm() {
                     pharmacistName
                 });
 
-                const response = await submitForm(formData);
+                const response = await wellcaApi.submitForm(formData);
                 console.log('Professional Services submission response:', response);
 
                 showMessage('Successfully Submitted!');
@@ -267,13 +269,9 @@ async function handleServiceSubmission(e) {
     };
 
     try {
-        const response = await submitServiceData(serviceData);
-        if (response.ok) {
-            showSuccessMessage('Service added successfully');
-            updateServicesList();
-        } else {
-            showErrorMessage('Error adding service');
-        }
+        const response = await wellcaApi.submitServiceData(serviceData);
+        showSuccessMessage('Service added successfully');
+        updateServicesList();
     } catch (error) {
         showErrorMessage('Error: ' + error.message);
     }
@@ -303,21 +301,8 @@ function showErrorMessage(message) {
 /* ------------------------------------------------------------------------- 
  * API Calls
  * --------------------------------------------------------------------- */
-async function submitServiceData(data) {
-    return fetch('/wellca-management/submit', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            [csrfHeader]: csrfToken
-        },
-        body: JSON.stringify(data)
-    });
-}
-
 async function refreshReportData() {
     try {
-        console.log('Refreshing report data');
-        
         const startDateInput = document.getElementById('startDate');
         const endDateInput = document.getElementById('endDate');
         
@@ -326,88 +311,15 @@ async function refreshReportData() {
             return;
         }
 
-        // Use the input values directly without Date object conversion
-        const startDate = startDateInput.value;
-        const endDate = endDateInput.value;
-        
-        console.log('Date range:', startDate, 'to', endDate);
-
-        const response = await fetch(`/wellca-management/range?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                [csrfHeader]: csrfToken
-            }
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.text();
-            console.error('Server response:', errorData);
-            throw new Error('Failed to fetch report data');
-        }
-
-        const data = await response.json();
-        console.log('Report data:', data);
+        const data = await wellcaApi.getReportData(
+            startDateInput.value,
+            endDateInput.value
+        );
         
         updateReportDisplay(data);
     } catch (error) {
         console.error('Error refreshing report data:', error);
         showErrorMessage(`Error loading report: ${error.message}`);
-    }
-}
-
-async function submitForm(formData) {
-    try {
-        // Ensure all required fields are present and properly formatted
-        const sanitizedData = {
-            date: formData.date,
-            // Service specific fields
-            serviceType: formData.serviceType,
-            serviceCost: Number(formData.serviceCost) || 0,
-            // Patient info
-            patientName: formData.patientName?.trim() || '',
-            patientDob: formData.patientDob?.trim() || '',
-            pharmacistName: formData.pharmacistName?.trim() || '',
-            // Ensure all numeric fields are initialized to 0, not null
-            purolator: Number(formData.purolator) || 0,
-            fedex: Number(formData.fedex) || 0,
-            oneCourier: Number(formData.oneCourier) || 0,
-            goBolt: Number(formData.goBolt) || 0,
-            newRx: Number(formData.newRx) || 0,
-            refill: Number(formData.refill) || 0,
-            reAuth: Number(formData.reAuth) || 0,
-            hold: Number(formData.hold) || 0,
-            profilesEntered: Number(formData.profilesEntered) || 0,
-            whoFilledRx: Number(formData.whoFilledRx) || 0,
-            activePercentage: Number(formData.activePercentage) || 0
-        };
-
-        console.log('Submitting sanitized form data:', JSON.stringify(sanitizedData, null, 2));
-
-        const response = await fetch('/wellca-management/submit', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                [csrfHeader]: csrfToken
-            },
-            body: JSON.stringify(sanitizedData)
-        });
-
-        console.log('Response status:', response.status);
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Server response:', errorText);
-            throw new Error(`Submission failed: ${errorText}`);
-        }
-
-        const data = await response.json();
-        console.log('Submission successful:', data);
-        
-        return data;
-    } catch (error) {
-        console.error('Error submitting form:', error);
-        throw error;
     }
 }
 
@@ -754,7 +666,7 @@ function setupDeliveryForm() {
                     serviceCost: 0
                 };
 
-                const response = await submitForm(formData);
+                const response = await wellcaApi.submitForm(formData);
                 console.log('Delivery submission response:', response);
                 showMessage('Successfully Submitted!');
 
@@ -783,7 +695,6 @@ function setupDeliveryForm() {
 function setupRxSalesForm() {
     const rxSalesForm = document.getElementById('rxSalesForm');
     if (rxSalesForm) {
-        // Remove any existing event listeners
         const clonedForm = rxSalesForm.cloneNode(true);
         rxSalesForm.parentNode.replaceChild(clonedForm, rxSalesForm);
         
@@ -796,63 +707,40 @@ function setupRxSalesForm() {
                 submitButton.disabled = true;
             }
 
-            console.log('Submitting RX Sales form...');
-
-            const formData = {
-                date: document.getElementById('date').value,
-                // RX Sales data
-                newRx: parseInt(document.getElementById('newRx').value) || 0,
-                refill: parseInt(document.getElementById('refill').value) || 0,
-                reAuth: parseInt(document.getElementById('reAuth').value) || 0,
-                hold: parseInt(document.getElementById('hold').value) || 0,
-                // Initialize other category fields to 0
-                purolator: 0,
-                fedex: 0,
-                oneCourier: 0,
-                goBolt: 0,
-                profilesEntered: 0,
-                whoFilledRx: 0,
-                activePercentage: 0,
-                serviceType: null,
-                serviceCost: 0
-            };
-
-            console.log('RX Sales form data:', formData);
-
             try {
-                const response = await submitForm(formData);
-                console.log('RX Sales submission response:', response);
-                showMessage('Successfully Submitted!');
-                
-                // Calculate and update totals
-                const totalFilled = formData.newRx + formData.refill + formData.reAuth;
-                const totalEntered = totalFilled + formData.hold;
-                
-                // Update the display totals
-                if (document.getElementById('totalFilled')) {
-                    document.getElementById('totalFilled').textContent = totalFilled;
-                }
-                if (document.getElementById('totalEntered')) {
-                    document.getElementById('totalEntered').textContent = totalEntered;
-                }
-                if (document.getElementById('totalPerHour')) {
-                    document.getElementById('totalPerHour').textContent = (totalEntered / 8).toFixed(2);
-                }
+                const formData = {
+                    date: document.getElementById('date').value,
+                    newRx: parseInt(document.getElementById('newRx').value) || 0,
+                    refill: parseInt(document.getElementById('refill').value) || 0,
+                    reAuth: parseInt(document.getElementById('reAuth').value) || 0,
+                    hold: parseInt(document.getElementById('hold').value) || 0,
+                    // Other fields initialized to 0
+                    purolator: 0,
+                    fedex: 0,
+                    oneCourier: 0,
+                    goBolt: 0,
+                    profilesEntered: 0,
+                    whoFilledRx: 0,
+                    activePercentage: 0,
+                    serviceType: null,
+                    serviceCost: 0
+                };
 
-                // Reset the form after successful submission
+                const response = await wellcaApi.submitForm(formData);
+                showSuccessMessage('Successfully submitted!');
+                
+                // Update totals display
+                calculateRxTotals();
                 clonedForm.reset();
                 
+            } catch (error) {
+                showErrorMessage('Failed to save RX Sales data: ' + error.message);
+            } finally {
                 if (submitButton) {
                     submitButton.disabled = false;
                 }
-
-            } catch (error) {
-                console.error('Error submitting RX Sales data:', error);
-                showMessage('Failed to save RX Sales data: ' + error.message, 'error');
             }
         });
-    } else {
-        console.error('RX Sales form not found in DOM');
     }
 }
 
@@ -906,7 +794,7 @@ function setupProfilesForm() {
             console.log('Weekly Profiles form data:', formData);
 
             try {
-                const response = await submitForm(formData);
+                const response = await wellcaApi.submitForm(formData);
                 console.log('Weekly Profiles submission response:', response);
                 showMessage('Successfully Submitted!');
 
