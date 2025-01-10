@@ -32,7 +32,7 @@ export function setupFormHandlers() {
 
     // Add form submission handlers
     const deliveryForm = document.getElementById(FORM_IDS.DELIVERY);
-    const rxForm = document.getElementById(FORM_IDS.RX);
+    const rxForm = document.getElementById('rxSalesForm');
     
     if (deliveryForm) {
         deliveryForm.addEventListener('submit', async (e) => {
@@ -79,22 +79,44 @@ export function setupFormHandlers() {
     if (rxForm) {
         rxForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            e.stopPropagation();
+            console.log('RX form submission intercepted');
+            
             const submitButton = rxForm.querySelector('button[type="submit"]');
             if (submitButton) submitButton.disabled = true;
             
             try {
                 const formData = {
                     date: document.getElementById(INPUT_FIELDS.DATE).value,
-                    newRx: parseInt(document.getElementById(INPUT_FIELDS.RX[0]).value) || 0,
-                    refill: parseInt(document.getElementById(INPUT_FIELDS.RX[1]).value) || 0,
-                    reAuth: parseInt(document.getElementById(INPUT_FIELDS.RX[2]).value) || 0,
-                    hold: parseInt(document.getElementById(INPUT_FIELDS.RX[3]).value) || 0
+                    // RX fields - using RX_SALES instead of RX
+                    newRx: parseInt(document.getElementById(INPUT_FIELDS.RX_SALES[0]).value) || 0,
+                    refill: parseInt(document.getElementById(INPUT_FIELDS.RX_SALES[1]).value) || 0,
+                    reAuth: parseInt(document.getElementById(INPUT_FIELDS.RX_SALES[2]).value) || 0,
+                    hold: parseInt(document.getElementById(INPUT_FIELDS.RX_SALES[3]).value) || 0,
+                    // Initialize delivery fields with defaults
+                    purolator: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    fedex: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    oneCourier: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    goBolt: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    // Initialize profile fields with defaults
+                    profilesEntered: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    whoFilledRx: DEFAULT_VALUES.NUMERIC_FIELDS,
+                    activePercentage: DEFAULT_VALUES.ACTIVE_PERCENTAGE,
+                    // Initialize service fields with defaults
+                    serviceType: '',
+                    serviceCost: DEFAULT_VALUES.SERVICE_COST,
+                    patientName: '',
+                    patientDob: '',
+                    pharmacistName: ''
                 };
                 
+                console.log('Submitting RX form data:', formData);
                 await wellcaApi.submitForm(formData);
+                console.log('RX form submission successful');
                 showMessage(VALIDATION_MESSAGES.SUBMISSION_SUCCESS, MESSAGE_TYPES.SUCCESS);
                 rxForm.reset();
             } catch (error) {
+                console.error('RX form submission error:', error);
                 showMessage(VALIDATION_MESSAGES.SUBMISSION_ERROR + error.message, MESSAGE_TYPES.ERROR);
             } finally {
                 if (submitButton) submitButton.disabled = false;
