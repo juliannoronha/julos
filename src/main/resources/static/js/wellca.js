@@ -15,7 +15,8 @@ import {
     TIME_CONSTANTS,
     TAB_CONFIG,
     MESSAGE_TYPES,
-    VALIDATION_MESSAGES
+    VALIDATION_MESSAGES,
+    CHART_CONFIG
 } from './config/wellcaconstants.js';
 import { setupFormHandlers } from './core/wellcaformhandler.js';
 import { 
@@ -35,10 +36,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fix for date input initialization
     const dateInput = document.getElementById(INPUT_FIELDS.DATE);
     if (dateInput) {
-        // Get today's date and set it at noon to avoid timezone issues
         const today = new Date();
         today.setHours(12, 0, 0, 0);
-        dateInput.value = today.toISOString().split(DATE_CONFIG.ISO_FORMAT)[0];
+        const formattedDate = today.toISOString().split('T')[0];
+        dateInput.value = formattedDate;
     }
 
     // Initialize start and end dates for reports
@@ -47,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (startDateInput && endDateInput) {
         const today = new Date();
         today.setHours(12, 0, 0, 0);
-        const formattedDate = today.toISOString().split(DATE_CONFIG.ISO_FORMAT)[0];
+        const formattedDate = today.toISOString().split('T')[0];
         startDateInput.value = formattedDate;
         endDateInput.value = formattedDate;
     }
@@ -63,6 +64,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 initializeChart();
             }
         });
+    }
+
+    // Add date range validation listeners
+    if (startDateInput && endDateInput) {
+        startDateInput.addEventListener('change', validateDateRange);
+        endDateInput.addEventListener('change', validateDateRange);
+    }
+    
+    // Add generate report listener
+    const generateButton = document.querySelector('.generate-button');
+    if (generateButton) {
+        generateButton.addEventListener('click', generateReport);
     }
 });
 
@@ -133,20 +146,6 @@ async function handleServiceSubmission(e) {
 /* ------------------------------------------------------------------------- 
  * Utility Functions
  * --------------------------------------------------------------------- */
-function showMessage(message, type = MESSAGE_TYPES.SUCCESS) {
-    const messageElement = document.createElement('div');
-    messageElement.className = `${CSS_CLASSES.MESSAGE_BUBBLE} ${type}-bubble ${CSS_CLASSES.SLIDE_IN_FADE}`;
-    messageElement.textContent = message;
-    
-    messageContainer.appendChild(messageElement);
-
-    setTimeout(() => {
-        messageElement.classList.add(CSS_CLASSES.FADE_OUT);
-        setTimeout(() => {
-            messageContainer.removeChild(messageElement);
-        }, TIME_CONSTANTS.ANIMATION_DURATION);
-    }, TIME_CONSTANTS.MESSAGE_DISPLAY_DURATION);
-}
 
 function formatDate(dateString) {
     if (!dateString) return 'N/A';
@@ -388,6 +387,31 @@ function updateChart(data) {
 }
 
 /* ------------------------------------------------------------------------- 
+ * Chart Initialization
+ * --------------------------------------------------------------------- */
+function initializeChart() {
+    const ctx = document.getElementById(DISPLAY_IDS.REPORT_CHART)?.getContext('2d');
+    if (!ctx) {
+        showMessage(VALIDATION_MESSAGES.CHART_CONTEXT_ERROR, MESSAGE_TYPES.ERROR);
+        return;
+    }
+
+    reportChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: CHART_CONFIG.DATASETS.map(config => ({
+                ...config,
+                data: [],
+                fill: false,
+                tension: 0.4
+            }))
+        },
+        options: CHART_CONFIG.OPTIONS
+    });
+}
+
+/* ------------------------------------------------------------------------- 
  * Exports
  * --------------------------------------------------------------------- */
 export {
@@ -401,6 +425,7 @@ export {
     validateDateRange,
     
     // Chart Functions
+    initializeChart,
     updateReportDisplay,
     updateChart,
     updateDeliveryStatistics,
