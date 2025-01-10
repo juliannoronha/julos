@@ -255,8 +255,6 @@ async function generateReport() {
  * Chart and Display Functions
  * --------------------------------------------------------------------- */
 async function updateReportDisplay(data) {
-    console.log('Received report data:', data);
-    
     try {
         // Update delivery statistics
         const deliveryStats = {
@@ -275,6 +273,12 @@ async function updateReportDisplay(data) {
             totalProcessed: 0
         };
 
+        // Add Professional Services statistics
+        const servicesStats = {
+            totalCost: 0,
+            serviceTypes: {}
+        };
+
         // Process data
         data.forEach(entry => {
             console.log('Processing entry:', entry);
@@ -290,6 +294,17 @@ async function updateReportDisplay(data) {
             rxStats.refill += entry.refill || 0;
             rxStats.reAuth += entry.reAuth || 0;
             rxStats.hold += entry.hold || 0;
+
+            // Process Professional Services
+            if (entry.serviceType && entry.serviceCost) {
+                servicesStats.totalCost += entry.serviceCost;
+                
+                // Count service types
+                if (entry.serviceType) {
+                    servicesStats.serviceTypes[entry.serviceType] = 
+                        (servicesStats.serviceTypes[entry.serviceType] || 0) + 1;
+                }
+            }
         });
 
         // Calculate total processed
@@ -312,6 +327,22 @@ async function updateReportDisplay(data) {
         document.getElementById('totalReAuth').textContent = rxStats.reAuth;
         document.getElementById('totalHold').textContent = rxStats.hold;
         document.getElementById('reportTotalProcessed').textContent = rxStats.totalProcessed;
+
+        // Update Professional Services display
+        document.getElementById('totalServices').textContent = 
+            `$${servicesStats.totalCost.toFixed(2)}`;
+
+        // Update service breakdown
+        const breakdownContainer = document.getElementById('serviceBreakdown');
+        if (breakdownContainer) {
+            breakdownContainer.innerHTML = '';
+            Object.entries(servicesStats.serviceTypes).forEach(([type, count]) => {
+                const row = document.createElement('div');
+                row.className = 'service-row';
+                row.textContent = `${type}: ${count}`;
+                breakdownContainer.appendChild(row);
+            });
+        }
 
         // Update chart with the processed data
         await updateChart(data);
@@ -391,7 +422,8 @@ async function updateChart(data) {
             acc[entry.date].rxCount += (entry.newRx || 0) + (entry.refill || 0) + (entry.reAuth || 0);
             acc[entry.date].deliveries += (entry.purolator || 0) + (entry.fedex || 0) + 
                                         (entry.oneCourier || 0) + (entry.goBolt || 0);
-            acc[entry.date].services += entry.serviceCost || 0;
+            // Count services instead of summing cost
+            acc[entry.date].services += (entry.serviceType && entry.serviceCost) ? 1 : 0;
             
             return acc;
         }, {});
