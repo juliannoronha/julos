@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const dateInput = document.getElementById(INPUT_FIELDS.DATE);
     if (dateInput) {
         const today = new Date();
-        today.setHours(12, 0, 0, 0);
+        today.setUTCHours(12, 0, 0, 0);
         const formattedDate = today.toISOString().split('T')[0];
         dateInput.value = formattedDate;
     }
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const endDateInput = document.getElementById(INPUT_FIELDS.END_DATE);
     if (startDateInput && endDateInput) {
         const today = new Date();
-        today.setHours(12, 0, 0, 0);
+        today.setUTCHours(12, 0, 0, 0);
         const formattedDate = today.toISOString().split('T')[0];
         startDateInput.value = formattedDate;
         endDateInput.value = formattedDate;
@@ -398,7 +398,10 @@ async function updateChart(data) {
 
         // Convert grouped data to arrays
         Object.entries(groupedData).forEach(([date, values]) => {
-            chartData.labels.push(new Date(date).toLocaleDateString());
+            // Create date at noon UTC
+            const displayDate = new Date(date);
+            displayDate.setUTCHours(12, 0, 0, 0);
+            chartData.labels.push(displayDate.toLocaleDateString());
             chartData.rxCount.push(values.rxCount);
             chartData.deliveries.push(values.deliveries);
             chartData.rxPerDelivery.push(
@@ -512,3 +515,10 @@ export {
     formatDate,
     formatServiceType
 };
+
+function standardizeDate(dateString) {
+    // Create date at noon UTC to avoid timezone shifts
+    const date = new Date(dateString);
+    date.setUTCHours(12, 0, 0, 0);
+    return date.toISOString().split('T')[0];
+}
