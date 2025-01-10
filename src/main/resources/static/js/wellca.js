@@ -515,10 +515,22 @@ function initializeChart() {
         }
 
         const chartColors = {
-            RX_COUNT: '#4CAF50',
-            DELIVERIES: '#2196F3',
-            RX_PER_DELIVERY: '#FFC107',
-            SERVICES: '#9C27B0'
+            RX_COUNT: {
+                border: '#4CAF50',
+                background: 'rgba(76, 175, 80, 0.1)'
+            },
+            DELIVERIES: {
+                border: '#2196F3',
+                background: 'rgba(33, 150, 243, 0.1)'
+            },
+            RX_PER_DELIVERY: {
+                border: '#FFC107',
+                background: 'rgba(255, 193, 7, 0.1)'
+            },
+            SERVICES: {
+                border: '#9C27B0',
+                background: 'rgba(156, 39, 176, 0.1)'
+            }
         };
 
         reportChart = new Chart(ctx, {
@@ -528,36 +540,104 @@ function initializeChart() {
                 datasets: [
                     {
                         label: 'RX Count',
-                        borderColor: chartColors.RX_COUNT,
+                        borderColor: chartColors.RX_COUNT.border,
+                        backgroundColor: chartColors.RX_COUNT.background,
                         data: [],
-                        fill: false
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
                     },
                     {
                         label: 'Deliveries',
-                        borderColor: chartColors.DELIVERIES,
+                        borderColor: chartColors.DELIVERIES.border,
+                        backgroundColor: chartColors.DELIVERIES.background,
                         data: [],
-                        fill: false
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
                     },
                     {
                         label: 'RX per Delivery',
-                        borderColor: chartColors.RX_PER_DELIVERY,
+                        borderColor: chartColors.RX_PER_DELIVERY.border,
+                        backgroundColor: chartColors.RX_PER_DELIVERY.background,
                         data: [],
-                        fill: false
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
                     },
                     {
                         label: 'Services Count',
-                        borderColor: chartColors.SERVICES,
+                        borderColor: chartColors.SERVICES.border,
+                        backgroundColor: chartColors.SERVICES.background,
                         data: [],
-                        fill: false
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
                     }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: {
+                            size: 14
+                        },
+                        bodyFont: {
+                            size: 13
+                        },
+                        cornerRadius: 4,
+                        displayColors: true
+                    }
+                },
                 scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(200, 200, 200, 0.1)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            },
+                            padding: 8
+                        }
                     }
                 }
             }
