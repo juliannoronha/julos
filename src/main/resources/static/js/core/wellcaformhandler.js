@@ -192,22 +192,28 @@ function setupServicesForm() {
         clonedForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             e.stopPropagation();
+            console.log('Professional Services form submission started');
             
             const submitButton = clonedForm.querySelector('button[type="submit"]');
-            if (submitButton) {
-                submitButton.disabled = true;
-            }
+            if (submitButton) submitButton.disabled = true;
 
             try {
-                // Get form values with enhanced validation
                 const serviceType = document.getElementById(INPUT_FIELDS.SERVICES[0]).value;
                 const serviceCost = parseFloat(document.getElementById(INPUT_FIELDS.SERVICES[1]).value) || DEFAULT_VALUES.SERVICE_COST;
                 const patientName = document.getElementById(INPUT_FIELDS.SERVICES[2]).value;
                 const patientDob = document.getElementById(INPUT_FIELDS.SERVICES[3]).value;
                 const pharmacistName = document.getElementById(INPUT_FIELDS.SERVICES[4]).value;
 
+                console.log('Professional Services form validation:', {
+                    serviceType: !!serviceType,
+                    serviceCost: !!serviceCost,
+                    patientName: !!patientName,
+                    patientDob: !!patientDob,
+                    pharmacistName: !!pharmacistName
+                });
+
                 if (!serviceType || !serviceCost || !patientName || !patientDob || !pharmacistName) {
-                    console.error('Service validation failed: missing required fields');
+                    console.error('Professional Services validation failed: missing required fields');
                     showMessage(VALIDATION_MESSAGES.REQUIRED_FIELDS, MESSAGE_TYPES.ERROR);
                     return;
                 }
@@ -233,21 +239,25 @@ function setupServicesForm() {
                     activePercentage: DEFAULT_VALUES.ACTIVE_PERCENTAGE
                 };
 
+                console.log('Professional Services form data to be submitted:', {
+                    date: formData.date,
+                    serviceType: formData.serviceType,
+                    serviceCost: formData.serviceCost,
+                    patientName: formData.patientName,
+                    patientDob: formData.patientDob,
+                    pharmacistName: formData.pharmacistName
+                });
+
                 const response = await wellcaApi.submitForm(formData);
+                console.log('Professional Services form submission response:', response);
                 showMessage(VALIDATION_MESSAGES.SERVICE_ADDED, MESSAGE_TYPES.SUCCESS);
                 clonedForm.reset();
-
-                if (submitButton) {
-                    submitButton.disabled = false;
-                }
-
             } catch (error) {
-                console.error('Error submitting service form:', error);
+                console.error('Professional Services form submission error:', error);
                 showMessage(VALIDATION_MESSAGES.SUBMISSION_ERROR + error.message, MESSAGE_TYPES.ERROR);
-                
-                if (submitButton) {
-                    submitButton.disabled = false;
-                }
+            } finally {
+                if (submitButton) submitButton.disabled = false;
+                console.log('Professional Services form submission completed');
             }
         });
     } else {
