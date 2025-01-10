@@ -18,8 +18,11 @@ import {
     VALIDATION_MESSAGES
 } from './config/wellcaconstants.js';
 import { setupFormHandlers } from './core/wellcaformhandler.js';
+import { 
+    showMessage, 
+    initializeMessageContainer 
+} from './services/wellcamessage.js';
 
-let messageContainer;
 let reportChart = null;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -49,11 +52,8 @@ document.addEventListener('DOMContentLoaded', function() {
         endDateInput.value = formattedDate;
     }
 
-    if (!messageContainer) {
-        messageContainer = document.createElement('div');
-        messageContainer.className = CSS_CLASSES.MESSAGE_CONTAINER;
-        document.body.appendChild(messageContainer);
-    }
+    // Initialize message container
+    initializeMessageContainer();
 
     // Initialize chart when reports tab is shown
     const reportsTab = document.querySelector(`[${TAB_CONFIG.DATA_ATTRIBUTE}="${TAB_CONFIG.REPORTS_ID}"]`);
@@ -98,8 +98,12 @@ function initializeTabs() {
                 
                 // If switching to reports tab, refresh the data
                 if (tabId === TAB_CONFIG.REPORTS_ID) {
-                    refreshReportData();
+                    refreshReportData().catch(error => {
+                        showMessage(VALIDATION_MESSAGES.TAB_SWITCH_ERROR + error.message, MESSAGE_TYPES.ERROR);
+                    });
                 }
+            } else {
+                showMessage(VALIDATION_MESSAGES.TAB_NOT_FOUND, MESSAGE_TYPES.ERROR);
             }
         });
     });
@@ -151,6 +155,7 @@ function formatDate(dateString) {
         return date.toLocaleDateString(undefined, DATE_CONFIG.DISPLAY_FORMAT);
     } catch (error) {
         console.error('Date formatting error:', error);
+        showMessage(VALIDATION_MESSAGES.DATE_FORMAT_ERROR, MESSAGE_TYPES.WARNING);
         return 'Invalid Date';
     }
 }
@@ -185,7 +190,6 @@ async function refreshReportData() {
     }
 }
 
-// Add date validation function
 function validateDateRange() {
     const startDateInput = document.getElementById(INPUT_FIELDS.START_DATE).value;
     const endDateInput = document.getElementById(INPUT_FIELDS.END_DATE).value;
@@ -208,42 +212,33 @@ function validateDateRange() {
 }
 
 async function generateReport() {
-    console.log('Generating report...');
-    
-    // Validate dates before proceeding
     if (!validateDateRange()) {
         return;
     }
 
     try {
-        // Show loading state
         const generateButton = document.querySelector('.generate-button');
         const originalText = generateButton.textContent;
         generateButton.textContent = 'Generating...';
         generateButton.disabled = true;
         generateButton.classList.add(CSS_CLASSES.LOADING);
 
-        // Refresh the report data
         await refreshReportData();
 
-        // Update UI elements
         document.querySelectorAll('.report-section').forEach(section => {
             section.style.display = 'block';
         });
 
-        // Reset button state
         generateButton.textContent = originalText;
         generateButton.disabled = false;
         generateButton.classList.remove(CSS_CLASSES.LOADING);
 
-        // Show success message
-        showMessage(VALIDATION_MESSAGES.SUBMISSION_SUCCESS, MESSAGE_TYPES.SUCCESS);
+        showMessage(VALIDATION_MESSAGES.REPORT_GENERATED, MESSAGE_TYPES.SUCCESS);
 
     } catch (error) {
         console.error('Error generating report:', error);
         showMessage(VALIDATION_MESSAGES.REPORT_ERROR + error.message, MESSAGE_TYPES.ERROR);
         
-        // Reset button state
         const generateButton = document.querySelector('.generate-button');
         generateButton.textContent = 'Generate Report';
         generateButton.disabled = false;
@@ -304,6 +299,8 @@ function updateReportDisplay(data) {
                 );
                 chartData.datasets.services.push(servicesCount);
             });
+        } else {
+            showMessage(VALIDATION_MESSAGES.NO_DATA_AVAILABLE, MESSAGE_TYPES.WARNING);
         }
 
         updateChart(chartData);
@@ -311,12 +308,17 @@ function updateReportDisplay(data) {
 
     } catch (error) {
         console.error('Error updating report display:', error);
-        showMessage(VALIDATION_MESSAGES.REPORT_ERROR + error.message, MESSAGE_TYPES.ERROR);
+        showMessage(VALIDATION_MESSAGES.CHART_UPDATE_ERROR + error.message, MESSAGE_TYPES.ERROR);
     }
 }
 
 function updateDeliveryStatistics(data) {
-    if (data.length > 0) {
+    if (!data || data.length === 0) {
+        showMessage(VALIDATION_MESSAGES.NO_DELIVERY_DATA, MESSAGE_TYPES.WARNING);
+        return;
+    }
+
+    try {
         const totals = {
             purolator: 0,
             fedex: 0,
@@ -343,32 +345,46 @@ function updateDeliveryStatistics(data) {
             const element = document.getElementById(id);
             if (element) {
                 element.textContent = value;
+            } else {
+                console.warn(`Element with id ${id} not found`);
             }
         });
+
+    } catch (error) {
+        console.error('Error updating delivery statistics:', error);
+        showMessage(VALIDATION_MESSAGES.STATISTICS_UPDATE_ERROR + error.message, MESSAGE_TYPES.ERROR);
     }
 }
 
 function updateChart(data) {
     const ctx = document.getElementById(DISPLAY_IDS.REPORT_CHART)?.getContext('2d');
-    if (!ctx) return;
-
-    if (reportChart) {
-        reportChart.destroy();
+    if (!ctx) {
+        showMessage(VALIDATION_MESSAGES.CHART_CONTEXT_ERROR, MESSAGE_TYPES.ERROR);
+        return;
     }
 
-    reportChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: data.labels,
-            datasets: CHART_CONFIG.DATASETS.map((config, index) => ({
-                ...config,
-                data: Object.values(data.datasets)[index],
-                fill: false,
-                tension: 0.4
-            }))
-        },
-        options: CHART_CONFIG.OPTIONS
-    });
+    try {
+        if (reportChart) {
+            reportChart.destroy();
+        }
+
+        reportChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: CHART_CONFIG.DATASETS.map((config, index) => ({
+                    ...config,
+                    data: Object.values(data.datasets)[index],
+                    fill: false,
+                    tension: 0.4
+                }))
+            },
+            options: CHART_CONFIG.OPTIONS
+        });
+    } catch (error) {
+        console.error('Error creating chart:', error);
+        showMessage(VALIDATION_MESSAGES.CHART_CREATE_ERROR + error.message, MESSAGE_TYPES.ERROR);
+    }
 }
 
 /* ------------------------------------------------------------------------- 
